@@ -9,7 +9,6 @@ type Window struct {
 }
 
 func NewWindow(width, height int, title string) (Window, error) {
-
 	window := Window{
 		handle: nil,
 		width:  width,
@@ -42,21 +41,25 @@ func NewWindow(width, height int, title string) (Window, error) {
 	return window, nil
 }
 
-func (this *Window) Resize(width, height int) {
-	this.handle.SetSize(int(width), int(height))
-	this.width = width
-	this.height = height
+func (window *Window) Destroy() {
+	glfw.Terminate()
+}
+
+func (window *Window) Resize(width, height int) {
+	window.handle.SetSize(int(width), int(height))
+	window.width = width
+	window.height = height
 }
 
 func GetTime() float64 {
 	return glfw.GetTime()
 }
 
-func (this *Window) ShouldClose() bool {
-	return this.handle.ShouldClose()
+func (window *Window) ShouldClose() bool {
+	return window.handle.ShouldClose()
 }
 
-func (this *Window) PollAndSwap() {
+func (window *Window) PollAndSwap() {
 	glfw.PollEvents()
-	this.handle.SwapBuffers()
+	window.handle.SwapBuffers()
 }

@@ -2,8 +2,6 @@ package main
 
 import (
 	"gabriellv/game/core"
-
-	"github.com/go-gl/glfw/v3.0/glfw"
 )
 
 /*
@@ -20,6 +18,7 @@ const (
 
 func main() {
 	window, err := core.NewWindow(WIDTH, HEIGHT, TITLE)
+	defer window.Destroy()
 
 	if err != nil {
 		panic(err)
@@ -31,14 +30,39 @@ func main() {
 		panic(err)
 	}
 
-	lastTime := core.GetTime()
-	delta := 0.0
+	err = renderer.LoadDefaultMaterials()
+
+	if err != nil {
+		panic(err)
+	}
+
+	//lastTime := core.GetTime()
+	//delta := 0.0
+
+	vertices := []float32 {
+		-0.5, -0.5, 0.0,
+		-0.5, 0.5, 0.0,
+		0.5, 0.5, 0.0,
+		0.5, -0.5, 0.0,
+	}
+
+	indices := []uint32 {
+		0, 1, 2,
+		2, 3, 0,
+	}
+
+	mesh := core.NewMesh(vertices, indices)
+	mesh.Bind()
+
+	// render renderer mf
 
 	for !window.ShouldClose() {
-		delta = core.GetTime() - lastTime
+		//delta = core.GetTime() - lastTime
+
+		renderer.DrawMesh(mesh, core.Material {})
 
 		window.PollAndSwap()
 
-		lastTime = glfw.GetTime()
+		//lastTime = glfw.GetTime()
 	}
 }
