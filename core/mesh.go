@@ -1,13 +1,13 @@
 package core
 
 import (
-	"github.com/go-gl/gl/v3.3-core/gl"
+	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 type Mesh struct {
-	vao uint32
+	vao      uint32
 	vertices []float32
-	indices []uint32
+	indices  []uint32
 }
 
 func NewMesh(vertices []float32, indices []uint32) Mesh {
@@ -23,25 +23,27 @@ func NewMesh(vertices []float32, indices []uint32) Mesh {
 	gl.BindVertexArray(vao)
 
 	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)	
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, vertices_size, gl.Ptr(vertices), gl.STATIC_DRAW)
 
 	gl.GenBuffers(1, &ebo)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, indices_size, gl.Ptr(indices), gl.STATIC_DRAW)
 
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, gl.Ptr(0))
+	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(0)
 
-	return Mesh {
-		vao: vao,
+	gl.BindVertexArray(0)
+
+	return Mesh{
+		vao:      vao,
 		vertices: vertices,
-		indices: indices,
+		indices:  indices,
 	}
 }
 
 //
 
-func (mesh* Mesh) Bind() {
+func (mesh *Mesh) Bind() {
 	gl.BindVertexArray(mesh.vao)
 }
