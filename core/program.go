@@ -10,6 +10,7 @@ import (
 
 type Program struct {
 	id uint32
+	uniformCache map[string]int32
 }
 
 func (program *Program) Bind() {
@@ -38,6 +39,7 @@ func NewProgram(vertex, fragment Shader) (Program, error) {
 	}
 
 	program.id = id
+	program.uniformCache = make(map[string]int32)
 
 	return program, nil
 }
@@ -47,7 +49,7 @@ func NewProgram(vertex, fragment Shader) (Program, error) {
 func (program *Program) SetMaterial(material *Material) {
 	gl.UseProgram(program.id)
 
-	textureLocation := getUniformLocation(program.id, MATERIAL_TEXTURE_UNIFORM)
+	textureLocation := program.getUniformLocation(MATERIAL_TEXTURE_UNIFORM)
 
 	r, g, b, _ := material.Color.Unpack()
 
@@ -58,8 +60,17 @@ func (program *Program) SetMaterial(material *Material) {
 
 // set uniforms
 
-func getUniformLocation(programHandle uint32, uniformName string) int32 {
-	return gl.GetUniformLocation(programHandle, gl.Str(uniformName+"\x00"))
+func (program* Program) getUniformLocation(uniform string) int32 {
+
+	location, ok := program.uniformCache[uniform]
+
+	if !ok {
+		location = gl.GetUniformLocation(program.id, gl.Str(uniform + "\x00"))
+
+		program.uniformCache[uniform] = location
+	}
+
+	return location
 }
 
 //
