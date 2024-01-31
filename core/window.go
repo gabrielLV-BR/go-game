@@ -2,7 +2,6 @@ package core
 
 import (
 	"gabriellv/game/systems"
-	"unsafe"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -47,8 +46,9 @@ func NewWindow(width, height int, title string) (Window, error) {
 	return window, nil
 }
 
-func (window *Window) SetInputSystem(inputSystem *systems.InputSystem) {
-	window.handle.SetUserPointer(unsafe.Pointer(inputSystem))
+func (window *Window) SetupInputSystem() {
+	systems.InputSystem.Init()
+
 	window.handle.SetKeyCallback(systems.InputKeyCallback)
 	window.handle.SetCursorPosCallback(systems.InputMouseMotionCallback)
 	window.handle.SetMouseButtonCallback(systems.InputMouseButtonCallback)
@@ -59,7 +59,7 @@ func (window *Window) Destroy() {
 }
 
 func (window *Window) Resize(width, height int) {
-	window.handle.SetSize(int(width), int(height))
+	window.handle.SetSize(width, height)
 	window.width = width
 	window.height = height
 }

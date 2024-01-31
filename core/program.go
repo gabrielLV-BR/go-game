@@ -14,11 +14,11 @@ type Program struct {
 	uniformCache map[string]int32
 }
 
-func (program *Program) Bind() {
+func (program Program) Bind() {
 	gl.UseProgram(program.id)
 }
 
-func (program *Program) Unbind() {
+func (program Program) Unbind() {
 	gl.UseProgram(0)
 }
 
@@ -49,7 +49,7 @@ func NewProgram(shaders ...Shader) (Program, error) {
 
 // uniform interaction code
 
-func (program *Program) SetMaterial(material *Material) {
+func (program *Program) SetMaterial(material Material) {
 	program.SetColor(MATERIAL_COLOR_UNIFORM, material.Color)
 
 	texture := material.Textures[0]
@@ -79,7 +79,10 @@ func (program *Program) getUniformLocation(uniform string) int32 {
 	location, ok := program.uniformCache[uniform]
 
 	if !ok {
-		location = gl.GetUniformLocation(program.id, gl.Str(uniform+"\x00"))
+		uniformName, free := gl.Strs(uniform + "\x00")
+		defer free()
+
+		location = gl.GetUniformLocation(program.id, *uniformName)
 
 		program.uniformCache[uniform] = location
 	}

@@ -88,11 +88,11 @@ func (mesh *Mesh) SetAttributes(attributes ...MeshAttribute) {
 
 //
 
-func (mesh *Mesh) Bind() {
+func (mesh Mesh) Bind() {
 	gl.BindVertexArray(mesh.vao)
 }
 
-func (mesh *Mesh) Unbind() {
+func (mesh Mesh) Unbind() {
 	gl.BindVertexArray(0)
 }
 

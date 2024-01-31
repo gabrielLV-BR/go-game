@@ -68,6 +68,7 @@ func NewTexture(img image.Image) Texture {
 	gl.GenerateMipmap(texture.handle)
 
 	texture.Unbind()
+	dataPtr = nil
 
 	return texture
 }

@@ -21,15 +21,13 @@ func main() {
 	window, err := core.NewWindow(WIDTH, HEIGHT, TITLE)
 	defer window.Destroy()
 
-	inputSystem := core.NewInputSystem()
-
-	window.SetInputSystem(&inputSystem)
+	window.SetupInputSystem()
 
 	if err != nil {
 		panic(err)
 	}
 
-	renderer, err := core.NewRenderer(&window)
+	renderer, err := core.NewRenderer(window)
 
 	if err != nil {
 		panic(err)
@@ -72,7 +70,7 @@ func main() {
 	for !window.ShouldClose() {
 		renderer.Clear()
 
-		renderer.DrawMesh(&mesh, &material)
+		renderer.DrawMesh(mesh, material)
 
 		window.PollAndSwap()
 	}

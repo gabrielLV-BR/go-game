@@ -10,7 +10,7 @@ type Renderer struct {
 	programMap map[uint32]Program
 }
 
-func NewRenderer(window *Window) (Renderer, error) {
+func NewRenderer(window Window) (Renderer, error) {
 	renderer := Renderer{}
 
 	if err := gl.Init(); err != nil {
@@ -25,11 +25,7 @@ func NewRenderer(window *Window) (Renderer, error) {
 	return renderer, nil
 }
 
-func (renderer *Renderer) ProgramMap() map[uint32]Program {
-	return renderer.programMap
-}
-
-func (renderer *Renderer) GetProgramForMaterial(material *Material) Program {
+func (renderer *Renderer) GetProgramForMaterial(material Material) Program {
 	program, ok := renderer.programMap[material.Id()]
 
 	if !ok {
@@ -94,7 +90,7 @@ func (renderer *Renderer) Clear() {
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 }
 
-func (renderer *Renderer) DrawMesh(mesh *Mesh, material *Material) {
+func (renderer *Renderer) DrawMesh(mesh Mesh, material Material) {
 	program := renderer.GetProgramForMaterial(material)
 
 	program.Bind()
