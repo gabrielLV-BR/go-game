@@ -17,10 +17,6 @@ type Shader struct {
 func NewShader(source string, stage uint32) (Shader, error) {
 	shader := gl.CreateShader(stage)
 
-	println("------------------")
-	println(source)
-	println("------------------")
-
 	if stage != gl.VERTEX_SHADER && stage != gl.FRAGMENT_SHADER {
 		return Shader{}, errors.New("Invalid shader stage")
 	}

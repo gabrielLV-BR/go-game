@@ -3,13 +3,14 @@ package core
 import (
 	"errors"
 	"fmt"
+	"gabriellv/game/structs/color"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 type Program struct {
-	id uint32
+	id           uint32
 	uniformCache map[string]int32
 }
 
@@ -23,12 +24,14 @@ func (program *Program) Unbind() {
 
 //
 
-func NewProgram(vertex, fragment Shader) (Program, error) {
-	program := Program {}
+func NewProgram(shaders... Shader) (Program, error) {
+	program := Program{}
 
 	id := gl.CreateProgram()
-	gl.AttachShader(id, vertex.id)
-	gl.AttachShader(id, fragment.id)
+
+	for _, shader := range shaders {
+		gl.AttachShader(id, shader.id)
+	}
 
 	gl.LinkProgram(id)
 
@@ -47,25 +50,36 @@ func NewProgram(vertex, fragment Shader) (Program, error) {
 // uniform interaction code
 
 func (program *Program) SetMaterial(material *Material) {
-	gl.UseProgram(program.id)
+	program.SetColor(MATERIAL_COLOR_UNIFORM, material.Color)
 
-	textureLocation := program.getUniformLocation(MATERIAL_TEXTURE_UNIFORM)
+	texture := material.Textures[0]
 
-	r, g, b, _ := material.Color.Unpack()
+	texture.Bind(gl.TEXTURE0)
+	program.SetTexture(MATERIAL_TEXTURE0_UNIFORM, texture)
+}
 
-	gl.Uniform3f(textureLocation, r, g, b)
+func (program *Program) SetColor(uniform string, color color.Color) {
+	location := program.getUniformLocation(uniform)
 
-	//TODO also set textures
+	r, g, b, _ := color.Unpack()
+
+	gl.Uniform3f(location, r, g, b)
+}
+
+func (program *Program) SetTexture(uniform string, texture Texture) {
+	location := program.getUniformLocation(uniform)
+
+	gl.Uniform1i(location, int32(texture.Unit() - gl.TEXTURE0))
 }
 
 // set uniforms
 
-func (program* Program) getUniformLocation(uniform string) int32 {
+func (program *Program) getUniformLocation(uniform string) int32 {
 
 	location, ok := program.uniformCache[uniform]
 
 	if !ok {
-		location = gl.GetUniformLocation(program.id, gl.Str(uniform + "\x00"))
+		location = gl.GetUniformLocation(program.id, gl.Str(uniform+"\x00"))
 
 		program.uniformCache[uniform] = location
 	}

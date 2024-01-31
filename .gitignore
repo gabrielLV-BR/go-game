@@ -17,5 +17,12 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# Output binary
+game
+
+# Testing assets
+assets/textures/
+assets/models/
+
 # Go workspace file
 go.work

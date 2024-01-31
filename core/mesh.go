@@ -10,6 +10,18 @@ type Mesh struct {
 	indices  []uint32
 }
 
+type MeshBuilder struct {
+	attributes uint16
+	vertices   []float32
+	indices    []uint32
+}
+
+type MeshAttribute struct {
+	count int32
+	xsize int32
+	xtype uint32
+}
+
 func NewMesh(vertices []float32, indices []uint32) Mesh {
 	var vao uint32
 	var vbo uint32
@@ -30,9 +42,6 @@ func NewMesh(vertices []float32, indices []uint32) Mesh {
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, indices_size, gl.Ptr(indices), gl.STATIC_DRAW)
 
-	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 0, 0)
-	gl.EnableVertexAttribArray(0)
-
 	gl.BindVertexArray(0)
 
 	return Mesh{
@@ -42,8 +51,75 @@ func NewMesh(vertices []float32, indices []uint32) Mesh {
 	}
 }
 
+func (mesh *Mesh) Draw() {
+	gl.DrawElements(
+		gl.TRIANGLES,
+		int32(len(mesh.indices)),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+}
+
+func (mesh *Mesh) SetAttributes(attributes ...MeshAttribute) {
+	mesh.Bind()
+
+	var stride int32
+
+	for _, attrib := range attributes {
+		stride += attrib.Stride()
+	}
+
+	var offset uint32
+	for i, attribute := range attributes {
+		gl.VertexAttribPointerWithOffset(
+			uint32(i),
+			attribute.count,
+			attribute.xtype,
+			false,
+			stride,
+			uintptr(offset),
+		)
+		gl.EnableVertexAttribArray(uint32(i))
+		offset += (uint32)(attribute.Stride())
+	}
+
+	mesh.Unbind()
+}
+
 //
 
 func (mesh *Mesh) Bind() {
 	gl.BindVertexArray(mesh.vao)
+}
+
+func (mesh *Mesh) Unbind() {
+	gl.BindVertexArray(0)
+}
+
+//
+
+var MeshAttributes MeshAttribute
+
+func (m MeshAttribute) Position() MeshAttribute {
+	return MeshAttribute{
+		count: 3,
+		xsize: 4,
+		xtype: gl.FLOAT,
+	}
+}
+
+func (m MeshAttribute) Normal() MeshAttribute {
+	return m.Position()
+}
+
+func (m MeshAttribute) UV() MeshAttribute {
+	return MeshAttribute{
+		count: 2,
+		xsize: 4,
+		xtype: gl.FLOAT,
+	}
+}
+
+func (m MeshAttribute) Stride() int32 {
+	return m.count * m.xsize
 }

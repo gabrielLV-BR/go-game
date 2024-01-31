@@ -3,8 +3,6 @@ package main
 import (
 	"gabriellv/game/core"
 	"gabriellv/game/structs/color"
-
-	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 /*
@@ -33,18 +31,15 @@ func main() {
 		panic(err)
 	}
 
-	if err := renderer.LoadDefaultMaterials() ; err != nil {
+	if err := renderer.LoadDefaultMaterials(); err != nil {
 		panic(err)
 	}
 
-	//lastTime := core.GetTime()
-	//delta := 0.0
-
 	vertices := []float32{
-		-0.2, -0.5, 0.0,
-		-0.5, 0.5, 0.0,
-		0.5, 0.5, 0.0,
-		0.5, -0.5, 0.0,
+		-0.5, -0.5, 0.0, 0.0, 0.0,
+		-0.5, 0.5, 0.0, 0.0, 1.0,
+		0.5, 0.5, 0.0, 1.0, 1.0,
+		0.5, -0.5, 0.0, 1.0, 0.0,
 	}
 
 	indices := []uint32{
@@ -53,22 +48,28 @@ func main() {
 	}
 
 	mesh := core.NewMesh(vertices, indices)
+	mesh.SetAttributes(
+		core.MeshAttributes.Position(),
+		core.MeshAttributes.UV(),
+	)
 
-	// render renderer mf
-	material := core.Material {
-		Color: color.Color{R: 1.0, G: 1.0, B: 1.0, A: 1.0},
+	diffuse, err := core.LoadTexture("assets/textures/brick_wall_diff.png")
+
+	if err != nil {
+		panic(err)
 	}
 
-	gl.ClearColor(1.0, 0.8, 0.6, 1.0)
+	// render renderer mf
+	material := core.Material{
+		Color:    color.Colors.White(),
+		Textures: []core.Texture{ diffuse },
+	}
 
 	for !window.ShouldClose() {
-		//delta = core.GetTime() - lastTime
-		gl.Clear(gl.COLOR_BUFFER_BIT)
+		renderer.Clear()
 
-		renderer.DrawMesh(mesh, material)
+		renderer.DrawMesh(&mesh, &material)
 
 		window.PollAndSwap()
-
-		//lastTime = glfw.GetTime()
 	}
 }

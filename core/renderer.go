@@ -2,7 +2,6 @@ package core
 
 import (
 	"path/filepath"
-	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
@@ -14,40 +13,49 @@ type Renderer struct {
 func NewRenderer(window *Window) (Renderer, error) {
 	renderer := Renderer{}
 
-	if err := gl.Init() ; err != nil {
+	if err := gl.Init(); err != nil {
 		return renderer, err
 	}
 
 	gl.Viewport(0, 0, int32(window.width), int32(window.height))
+	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 
 	renderer.programMap = make(map[uint32]Program)
 
 	return renderer, nil
 }
 
-func (renderer *Renderer) GetProgramForMaterial(material Material) *Program {
+func (renderer *Renderer) ProgramMap() map[uint32]Program {
+	return renderer.programMap
+}
+
+func (renderer *Renderer) GetProgramForMaterial(material *Material) Program {
 	program, ok := renderer.programMap[material.Id()]
 
 	if !ok {
-		return nil
+		panic("Program not found for material")
 	}
 
-	return &program
+	return program
 }
 
 func (renderer *Renderer) LoadDefaultMaterials() error {
 	defaultMaterials := []string{
 		"color",
+		"texture",
 	}
 
 	materialIds := []uint32{
-		0,
+		0, 1,
+	}
+
+	if len(defaultMaterials) != len(materialIds) {
+		panic("There must be a 1:1 mapping of Shader names and Id's")
 	}
 
 	const root string = "assets/shaders/"
 
 	for i, material := range defaultMaterials {
-
 		vertexPath := filepath.Join(root, material+".vert.glsl")
 		fragPath := filepath.Join(root, material+".frag.glsl")
 
@@ -66,7 +74,7 @@ func (renderer *Renderer) LoadDefaultMaterials() error {
 		program, err := NewProgram(vertexShader, fragShader)
 
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		gl.DeleteShader(vertexShader.id)
@@ -82,25 +90,19 @@ func (renderer *Renderer) Resize(width, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
-func (renderer *Renderer) DrawMesh(mesh Mesh, material Material) {
+func (renderer *Renderer) Clear() {
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+}
+
+func (renderer *Renderer) DrawMesh(mesh *Mesh, material *Material) {
 	program := renderer.GetProgramForMaterial(material)
 
-	if program == nil {
-		panic("No program for given Material")
-	}
+	program.Bind()
+	mesh.Bind()
 
-	gl.UseProgram(program.id)
-	gl.BindVertexArray(mesh.vao)
+	program.SetMaterial(material)
+	mesh.Draw()
 
-	program.SetMaterial(&material)
-
-	gl.DrawElements(
-		gl.TRIANGLES,
-		int32(len(mesh.indices)),
-		gl.UNSIGNED_INT,
-		unsafe.Pointer(nil),
-	)
-
-	gl.UseProgram(0)
-	gl.BindVertexArray(0)
+	program.Unbind()
+	mesh.Unbind()
 }

@@ -3,12 +3,13 @@ package core
 import "gabriellv/game/structs/color"
 
 const (
-	MATERIAL_TEXTURE_UNIFORM = "uColor"
+	MATERIAL_COLOR_UNIFORM    = "uColor"
+	MATERIAL_TEXTURE0_UNIFORM = "uTexture0"
 )
 
 type Material struct {
 	Color    color.Color
-	Textures []uint32
+	Textures []Texture
 }
 
 // this ID is calculated based on the textures present
