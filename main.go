@@ -21,6 +21,10 @@ func main() {
 	window, err := core.NewWindow(WIDTH, HEIGHT, TITLE)
 	defer window.Destroy()
 
+	inputSystem := core.NewInputSystem()
+
+	window.SetInputSystem(&inputSystem)
+
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +66,7 @@ func main() {
 	// render renderer mf
 	material := core.Material{
 		Color:    color.Colors.White(),
-		Textures: []core.Texture{ diffuse },
+		Textures: []core.Texture{diffuse},
 	}
 
 	for !window.ShouldClose() {

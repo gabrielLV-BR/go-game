@@ -41,13 +41,13 @@ func NewTexture(img image.Image) Texture {
 	var id uint32 = 0
 	gl.GenTextures(1, &id)
 
-	target      := uint32(gl.TEXTURE_2D)
+	target := uint32(gl.TEXTURE_2D)
 	internalFmt := int32(gl.SRGB_ALPHA)
-	format      := uint32(gl.RGBA)
-	width       := int32(rgba.Rect.Size().X)
-	height      := int32(rgba.Rect.Size().Y)
-	pixType     := uint32(gl.UNSIGNED_BYTE)
-	dataPtr     := gl.Ptr(rgba.Pix)
+	format := uint32(gl.RGBA)
+	width := int32(rgba.Rect.Size().X)
+	height := int32(rgba.Rect.Size().Y)
+	pixType := uint32(gl.UNSIGNED_BYTE)
+	dataPtr := gl.Ptr(rgba.Pix)
 
 	texture := Texture{
 		handle: id,
@@ -60,8 +60,8 @@ func NewTexture(img image.Image) Texture {
 	// TODO-cs
 	gl.TexParameteri(texture.target, gl.TEXTURE_WRAP_R, gl.MIRRORED_REPEAT)
 	gl.TexParameteri(texture.target, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT)
-	gl.TexParameteri(texture.target, gl.TEXTURE_MIN_FILTER, gl.LINEAR)  // minification filter
-	gl.TexParameteri(texture.target, gl.TEXTURE_MAG_FILTER, gl.LINEAR)  // magnification filter
+	gl.TexParameteri(texture.target, gl.TEXTURE_MIN_FILTER, gl.LINEAR) // minification filter
+	gl.TexParameteri(texture.target, gl.TEXTURE_MAG_FILTER, gl.LINEAR) // magnification filter
 
 	gl.TexImage2D(target, 0, internalFmt, width, height, 0, format, pixType, dataPtr)
 

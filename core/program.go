@@ -24,7 +24,7 @@ func (program *Program) Unbind() {
 
 //
 
-func NewProgram(shaders... Shader) (Program, error) {
+func NewProgram(shaders ...Shader) (Program, error) {
 	program := Program{}
 
 	id := gl.CreateProgram()
@@ -69,7 +69,7 @@ func (program *Program) SetColor(uniform string, color color.Color) {
 func (program *Program) SetTexture(uniform string, texture Texture) {
 	location := program.getUniformLocation(uniform)
 
-	gl.Uniform1i(location, int32(texture.Unit() - gl.TEXTURE0))
+	gl.Uniform1i(location, int32(texture.Unit()-gl.TEXTURE0))
 }
 
 // set uniforms
