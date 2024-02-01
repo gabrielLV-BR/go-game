@@ -55,7 +55,7 @@ func main() {
 		core.MeshAttributes.UV(),
 	)
 
-	diffuse, err := core.LoadTexture("assets/textures/brick_wall_diff.png")
+	diffuse, err := core.LoadTexture("assets/textures/smile.png")
 
 	if err != nil {
 		panic(err)

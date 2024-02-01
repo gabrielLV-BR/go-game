@@ -35,35 +35,36 @@ func NewTexture(img image.Image) Texture {
 	// store image in RGBA format
 	//TODO read img and figure out format used
 	rgba := image.NewRGBA(img.Bounds())
-
 	draw.Draw(rgba, rgba.Bounds(), img, image.Pt(0, 0), draw.Src)
 
-	var id uint32 = 0
-	gl.GenTextures(1, &id)
-
-	target := uint32(gl.TEXTURE_2D)
-	internalFmt := int32(gl.SRGB_ALPHA)
-	format := uint32(gl.RGBA)
 	width := int32(rgba.Rect.Size().X)
 	height := int32(rgba.Rect.Size().Y)
-	pixType := uint32(gl.UNSIGNED_BYTE)
 	dataPtr := gl.Ptr(rgba.Pix)
 
 	texture := Texture{
-		handle: id,
-		target: target,
+		target: gl.TEXTURE_2D,
 	}
+
+	gl.CreateTextures(texture.target, 1, &texture.handle)
 
 	texture.Bind(gl.TEXTURE0)
 
-	// set the texture wrapping/filtering options (applies to current bound texture obj)
-	// TODO-cs
 	gl.TexParameteri(texture.target, gl.TEXTURE_WRAP_R, gl.MIRRORED_REPEAT)
 	gl.TexParameteri(texture.target, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT)
-	gl.TexParameteri(texture.target, gl.TEXTURE_MIN_FILTER, gl.LINEAR) // minification filter
-	gl.TexParameteri(texture.target, gl.TEXTURE_MAG_FILTER, gl.LINEAR) // magnification filter
+	gl.TexParameteri(texture.target, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(texture.target, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
-	gl.TexImage2D(target, 0, internalFmt, width, height, 0, format, pixType, dataPtr)
+	gl.TexImage2D(
+		texture.target,
+		0,
+		gl.SRGB_ALPHA,
+		width,
+		height,
+		0,
+		gl.RGBA, 
+		gl.UNSIGNED_BYTE,
+		dataPtr,
+	)
 
 	gl.GenerateMipmap(texture.handle)
 
