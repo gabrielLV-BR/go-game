@@ -5,7 +5,11 @@ layout (location = 1) in vec2 inUV;
 
 out vec2 aUV;
 
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProj;
+
 void main() {
-	gl_Position = vec4(inPosition, 1.0);
+	gl_Position = uProj * uView * uModel * vec4(inPosition, 1.0);
 	aUV = inUV;
 }

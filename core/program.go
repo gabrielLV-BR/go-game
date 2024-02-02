@@ -7,6 +7,13 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
+)
+
+const (
+	PROGRAM_MODEL_MATRIX_UNIFORM = "uModel"
+	PROGRAM_VIEW_MATRIX_UNIFORM  = "uView"
+	PROGRAM_PROJ_MATRIX_UNIFORM  = "uProj"
 )
 
 type Program struct {
@@ -14,11 +21,11 @@ type Program struct {
 	uniformCache map[string]int32
 }
 
-func (program Program) Bind() {
+func (program *Program) Bind() {
 	gl.UseProgram(program.id)
 }
 
-func (program Program) Unbind() {
+func (program *Program) Unbind() {
 	gl.UseProgram(0)
 }
 
@@ -64,6 +71,18 @@ func (program *Program) SetColor(uniform string, color color.Color) {
 	r, g, b, _ := color.Unpack()
 
 	gl.Uniform3f(location, r, g, b)
+}
+
+func (program *Program) SetMVP(model, view, projection *mgl32.Mat4) {
+	program.SetMatrix(PROGRAM_MODEL_MATRIX_UNIFORM, model)
+	program.SetMatrix(PROGRAM_VIEW_MATRIX_UNIFORM, view)
+	program.SetMatrix(PROGRAM_PROJ_MATRIX_UNIFORM, projection)
+}
+
+func (program *Program) SetMatrix(uniform string, matrix *mgl32.Mat4) {
+	location := program.getUniformLocation(uniform)
+
+	gl.UniformMatrix4fv(location, 1, false, &matrix[0])
 }
 
 func (program *Program) SetTexture(uniform string, texture Texture) {

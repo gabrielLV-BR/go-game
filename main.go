@@ -2,7 +2,11 @@ package main
 
 import (
 	"gabriellv/game/core"
+	"gabriellv/game/structs"
 	"gabriellv/game/structs/color"
+	"runtime"
+
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 /*
@@ -16,6 +20,10 @@ const (
 	HEIGHT = 500
 	TITLE  = "Window"
 )
+
+func init() {
+	runtime.LockOSThread()
+}
 
 func main() {
 	window, err := core.NewWindow(WIDTH, HEIGHT, TITLE)
@@ -67,10 +75,19 @@ func main() {
 		Textures: []core.Texture{diffuse},
 	}
 
+	camera := structs.NewCamera()
+	camera.UsePerspectiveProjection(80.0, window.GetAspectRatio(), 0.1, 1000.0)
+	camera.SetPosition(mgl32.Vec3{0.0, 1.0, -1.0})
+	camera.LookAt(mgl32.Vec3{0.0, 0.0, 0.0})
+
 	for !window.ShouldClose() {
 		renderer.Clear()
 
-		renderer.DrawMesh(mesh, material)
+		pass := renderer.BeginDraw(&camera)
+
+		pass.DrawMesh(mesh, material)
+
+		pass.EndDraw()
 
 		window.PollAndSwap()
 	}

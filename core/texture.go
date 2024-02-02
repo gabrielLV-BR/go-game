@@ -31,6 +31,8 @@ func (texture *Texture) Unit() uint32 {
 	return texture.unit
 }
 
+// image's pixel data are on heap and the overall structure
+// is pretty small so we can copy it noprob
 func NewTexture(img image.Image) Texture {
 	// store image in RGBA format
 	//TODO read img and figure out format used
@@ -61,7 +63,7 @@ func NewTexture(img image.Image) Texture {
 		width,
 		height,
 		0,
-		gl.RGBA, 
+		gl.RGBA,
 		gl.UNSIGNED_BYTE,
 		dataPtr,
 	)
