@@ -8,10 +8,18 @@ type Transform struct {
 	Rotation mgl32.Quat
 }
 
-func NewTransform(position, scale mgl32.Vec3, rotation mgl32.Quat) Transform {
+func NewTransform() Transform {
 	return Transform{
-		Position: position,
-		Scale:    scale,
-		Rotation: rotation,
+		Position: mgl32.Vec3{0,0,0},
+		Scale:    mgl32.Vec3{1.0, 1.0, 1.0},
+		Rotation: mgl32.QuatIdent(),
 	}
+}
+
+func (transform *Transform) GetModelMatrix() mgl32.Mat4 {
+	rot := transform.Rotation.Mat4()
+	trans := mgl32.Translate3D(transform.Position.X(), transform.Position.Y(), transform.Position.Z())
+	scale := mgl32.Scale3D(transform.Scale.X(), transform.Scale.Y(), transform.Scale.Z())
+
+	return rot.Mul4(trans).Mul4(scale)
 }

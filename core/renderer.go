@@ -110,16 +110,16 @@ func (renderer *Renderer) Clear() {
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 }
 
-func (pass *renderPass) DrawMesh(mesh Mesh, material Material) {
+func (pass *renderPass) DrawMesh(mesh Mesh, transform structs.Transform, material Material) {
 	program := pass.renderer.GetProgramForMaterial(material)
 
 	program.Bind()
 	mesh.Bind()
 
-	ident := mgl32.Ident4()
+	model := transform.GetModelMatrix()
 
 	program.SetMaterial(material)
-	program.SetMVP(&ident, &pass.viewMatrix, &pass.projectionMatrix)
+	program.SetMVP(&model, &pass.viewMatrix, &pass.projectionMatrix)
 
 	mesh.Draw()
 

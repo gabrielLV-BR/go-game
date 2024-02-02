@@ -63,6 +63,8 @@ func main() {
 		core.MeshAttributes.UV(),
 	)
 
+	transform := structs.NewTransform()
+
 	diffuse, err := core.LoadTexture("assets/textures/smile.png")
 
 	if err != nil {
@@ -85,7 +87,7 @@ func main() {
 
 		pass := renderer.BeginDraw(&camera)
 
-		pass.DrawMesh(mesh, material)
+		pass.DrawMesh(mesh, transform, material)
 
 		pass.EndDraw()
 
