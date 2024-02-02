@@ -2,14 +2,14 @@ package structs
 
 import (
 	"gabriellv/game/utils"
-	"math"
+	math "github.com/chewxy/math32"
 
 	"github.com/go-gl/mathgl/mgl32"
 )
 
 type Camera struct {
-	position mgl32.Vec3
-	target   mgl32.Vec3
+	position  mgl32.Vec3
+	direction mgl32.Vec3
 
 	// to minimize recalculation
 	dirty            bool
@@ -19,8 +19,8 @@ type Camera struct {
 
 func NewCamera() Camera {
 	camera := Camera{
-		position: mgl32.Vec3{},
-		target:   mgl32.Vec3{},
+		position:  mgl32.Vec3{},
+		direction: mgl32.Vec3{},
 		// try to save a little bit on unnecessary calculations
 		dirty:            true,
 		projectionMatrix: mgl32.Ident4(),
@@ -51,47 +51,47 @@ func (camera *Camera) SetPosition(position mgl32.Vec3) {
 	camera.dirty = true
 }
 
+func (camera *Camera) LookAt(target mgl32.Vec3) {
+	if target.ApproxEqual(camera.position) {
+		panic("Camera's TARGET and POSITION must not be equal")
+	}
+
+	camera.direction = target.Sub(camera.position).Normalize()
+	camera.dirty = true
+}
+
 func (camera *Camera) Rotate(yawSpeed, pitchSpeed float32) {
+	if mgl32.FloatEqual(yawSpeed, pitchSpeed) && mgl32.FloatEqual(yawSpeed, 0.0) {
+		return
+	}
+
 	// veeery convoluted, seek better ways to do this
-	direction := camera.target.Sub(camera.position)
-	directionLen := direction.Len()
+	direction := camera.direction
 
-	direction[0] /= directionLen
-	direction[1] /= directionLen
-	direction[2] /= directionLen
-
-	yaw := float32(math.Atan2(float64(direction.X()), float64(direction.Z())))
-	pitch := float32(math.Asin(float64(-direction.Y())))
+	yaw := math.Atan2(direction.X(), direction.Z())
+	pitch := math.Asin(-direction.Y())
 
 	yaw += yawSpeed
 	pitch += pitchSpeed
 
 	direction = utils.AnglesToVector(yaw, pitch)
 
-	camera.target = camera.position.Add(direction)
-
 	camera.LookAt(camera.position.Add(direction))
 }
 
 func (camera *Camera) recalculateViewMatrix() {
 	up := mgl32.Vec3{0.0, 1.0, 0.0}
-	direction := camera.target.Sub(camera.position).Normalize()
 
-	right := up.Cross(direction)
-	up = direction.Cross(right)
+	right := up.Cross(camera.direction)
+	up = camera.direction.Cross(right)
 
-	target := camera.position.Add(direction.Mul(10.0))
+	target := camera.position.Add(camera.direction.Mul(10.0))
 
 	camera.viewMatrix = mgl32.LookAtV(
 		camera.position, target, up,
-	)
+	).Inv()
 
 	camera.dirty = false
-}
-
-func (camera *Camera) LookAt(target mgl32.Vec3) {
-	camera.target = target
-	camera.dirty = true
 }
 
 func (camera *Camera) UsePerspectiveProjection(fov, aspect, near, far float32) {

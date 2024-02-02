@@ -1,20 +1,17 @@
 package utils
 
 import (
-	"math"
+	math "github.com/chewxy/math32"
 
 	"github.com/go-gl/mathgl/mgl32"
 )
 
 func AnglesToVector(yaw, pitch float32) mgl32.Vec3 {
-	yaw64 := float64(yaw)
-	pitch64 := float64(pitch)
-
-	xsLen := math.Cos(pitch64)
+	xsLen := math.Cos(pitch)
 
 	return mgl32.Vec3{
-		float32(math.Cos(yaw64) * xsLen),
-		float32(math.Sin(pitch64)),
-		float32(math.Sin(-yaw64) * xsLen),
+		math.Cos(yaw) * xsLen,
+		math.Sin(pitch),
+		math.Sin(-yaw) * xsLen,
 	}
 }

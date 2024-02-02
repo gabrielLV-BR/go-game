@@ -117,9 +117,10 @@ func (pass *renderPass) DrawMesh(mesh Mesh, transform structs.Transform, materia
 	mesh.Bind()
 
 	model := transform.GetModelMatrix()
+	view := pass.viewMatrix.Inv()
 
 	program.SetMaterial(material)
-	program.SetMVP(&model, &pass.viewMatrix, &pass.projectionMatrix)
+	program.SetMVP(&model, &view, &pass.projectionMatrix)
 
 	mesh.Draw()
 

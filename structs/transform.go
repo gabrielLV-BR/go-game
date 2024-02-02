@@ -10,7 +10,7 @@ type Transform struct {
 
 func NewTransform() Transform {
 	return Transform{
-		Position: mgl32.Vec3{0,0,0},
+		Position: mgl32.Vec3{0, 0, 0},
 		Scale:    mgl32.Vec3{1.0, 1.0, 1.0},
 		Rotation: mgl32.QuatIdent(),
 	}

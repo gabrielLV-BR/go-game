@@ -1,9 +1,11 @@
 package main
 
 import (
+	"gabriellv/game/controllers"
 	"gabriellv/game/core"
 	"gabriellv/game/structs"
 	"gabriellv/game/structs/color"
+	"gabriellv/game/systems"
 	"runtime"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -78,18 +80,25 @@ func main() {
 	}
 
 	camera := structs.NewCamera()
-	camera.UsePerspectiveProjection(80.0, window.GetAspectRatio(), 0.1, 1000.0)
+	camera.UsePerspectiveProjection(80.0, float32(window.GetAspectRatio()), 0.1, 1000.0)
 	camera.SetPosition(mgl32.Vec3{0.0, 1.0, -1.0})
 	camera.LookAt(mgl32.Vec3{0.0, 0.0, 0.0})
 
-	for !window.ShouldClose() {
-		renderer.Clear()
+	fpsController := controllers.FPSCameraController{}
+	fpsController.Speed = 20.0
+	fpsController.MouseSensitivity = 1
 
+	for !window.ShouldClose() {
+		fpsController.Update(&camera, 0.016)
+
+		renderer.Clear()
 		pass := renderer.BeginDraw(&camera)
 
 		pass.DrawMesh(mesh, transform, material)
 
 		pass.EndDraw()
+
+		systems.InputSystem.Update()
 
 		window.PollAndSwap()
 	}
