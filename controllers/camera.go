@@ -32,6 +32,6 @@ func (controller *FPSCameraController) Update(camera *structs.Camera, delta floa
 
 	angularVelocity = systems.InputSystem.GetMouseDelta().Mul(controller.MouseSensitivity * delta)
 
-	camera.Translate(linearVelocity)
 	camera.Rotate(angularVelocity.X(), angularVelocity.Y())
+	camera.TranslateLocal(linearVelocity)
 }

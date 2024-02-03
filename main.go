@@ -82,7 +82,6 @@ func main() {
 	camera := structs.NewCamera()
 	camera.UsePerspectiveProjection(80.0, float32(window.GetAspectRatio()), 0.1, 1000.0)
 	camera.SetPosition(mgl32.Vec3{0.0, 1.0, -1.0})
-	camera.LookAt(mgl32.Vec3{0.0, 0.0, 0.0})
 
 	fpsController := controllers.FPSCameraController{}
 	fpsController.Speed = 20.0
