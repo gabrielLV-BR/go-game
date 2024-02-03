@@ -6,6 +6,7 @@ import (
 	"gabriellv/game/structs"
 	"gabriellv/game/structs/color"
 	"gabriellv/game/systems"
+	"math/rand"
 	"runtime"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -65,7 +66,7 @@ func main() {
 		core.MeshAttributes.UV(),
 	)
 
-	transform := structs.NewTransform()
+	// transform := structs.NewTransform()
 
 	diffuse, err := core.LoadTexture("assets/textures/smile.png")
 
@@ -79,6 +80,25 @@ func main() {
 		Textures: []core.Texture{diffuse},
 	}
 
+	transforms := make([]mgl32.Mat4, 100)
+
+	for i := range transforms {
+		x := rand.Float32()
+		y := rand.Float32()
+		z := rand.Float32()
+
+		transform := structs.Transform{}
+
+		transform.Position = mgl32.Vec3{x * 10.0, y * 10.0, z * 10.0}
+		transform.Scale = mgl32.Vec3{1, 1, 1}
+		transform.Rotation = mgl32.QuatIdent()
+		// transform.Rotation = mgl32.AnglesToQuat(x, y, z, mgl32.XYZ)
+
+		transforms[i] = transform.GetModelMatrix()
+	}
+
+	// transform := transforms[0]
+
 	camera := structs.NewCamera()
 	camera.UsePerspectiveProjection(80.0, float32(window.GetAspectRatio()), 0.1, 1000.0)
 	camera.SetPosition(mgl32.Vec3{0.0, 1.0, -1.0})
@@ -91,9 +111,11 @@ func main() {
 		fpsController.Update(&camera, 0.016)
 
 		renderer.Clear()
-		pass := renderer.BeginDraw(&camera)
+		pass := renderer.BeginDraw(&camera, core.RENDER_FEATURE_INSTANCED)
 
-		pass.DrawMesh(mesh, transform, material)
+		// pass.DrawMesh(mesh, transform, material)
+
+		pass.DrawMeshInstanced(mesh, material, transforms)
 
 		pass.EndDraw()
 

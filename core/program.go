@@ -79,6 +79,12 @@ func (program *Program) SetMVP(model, view, projection *mgl32.Mat4) {
 	program.SetMatrix(PROGRAM_PROJ_MATRIX_UNIFORM, projection)
 }
 
+// for instanced rendering
+func (program *Program) SetVP(view, projection *mgl32.Mat4) {
+	program.SetMatrix(PROGRAM_VIEW_MATRIX_UNIFORM, view)
+	program.SetMatrix(PROGRAM_PROJ_MATRIX_UNIFORM, projection)
+}
+
 func (program *Program) SetMatrix(uniform string, matrix *mgl32.Mat4) {
 	location := program.getUniformLocation(uniform)
 

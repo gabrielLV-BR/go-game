@@ -97,7 +97,7 @@ func (camera *Camera) recalculateViewMatrix() {
 
 	camera.viewMatrix = mgl32.LookAtV(
 		camera.position, target, up,
-	).Inv()
+	)
 
 	camera.dirty = false
 }

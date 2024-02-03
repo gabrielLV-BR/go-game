@@ -51,15 +51,6 @@ func NewMesh(vertices []float32, indices []uint32) Mesh {
 	}
 }
 
-func (mesh *Mesh) Draw() {
-	gl.DrawElements(
-		gl.TRIANGLES,
-		int32(len(mesh.indices)),
-		gl.UNSIGNED_INT,
-		nil,
-	)
-}
-
 func (mesh *Mesh) SetAttributes(attributes ...MeshAttribute) {
 	mesh.Bind()
 
