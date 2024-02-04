@@ -16,7 +16,7 @@ func NewTransform() Transform {
 	}
 }
 
-func (transform *Transform) GetModelMatrix() mgl32.Mat4 {
+func (transform *Transform) ModelMatrix() mgl32.Mat4 {
 	rot := transform.Rotation.Mat4()
 	trans := mgl32.Translate3D(transform.Position.X(), transform.Position.Y(), transform.Position.Z())
 	scale := mgl32.Scale3D(transform.Scale.X(), transform.Scale.Y(), transform.Scale.Z())

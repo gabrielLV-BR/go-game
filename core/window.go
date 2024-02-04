@@ -1,8 +1,7 @@
 package core
 
 import (
-	"gabriellv/game/systems"
-
+	"gabriellv/game/core/systems"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -46,7 +45,7 @@ func NewWindow(width, height int, title string) (Window, error) {
 	return window, nil
 }
 
-func (window *Window) GetAspectRatio() float32 {
+func (window *Window) AspectRatio() float32 {
 	return float32(window.width) / float32(window.height)
 }
 
@@ -60,6 +59,10 @@ func (window *Window) SetupInputSystem() {
 
 func (window *Window) Destroy() {
 	glfw.Terminate()
+}
+
+func (window *Window) Size() (int, int) {
+	return window.width, window.height
 }
 
 func (window *Window) Resize(width, height int) {

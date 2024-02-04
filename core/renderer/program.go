@@ -1,9 +1,10 @@
-package core
+package renderer
 
 import (
 	"errors"
 	"fmt"
-	"gabriellv/game/structs/color"
+	"gabriellv/game/core"
+	"gabriellv/game/structs"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -55,17 +56,26 @@ func NewProgram(shaders ...Shader) (Program, error) {
 }
 
 // uniform interaction code
+func (program *Program) SetMaterial(material core.Material) {
+	uniforms := material.Uniforms()
 
-func (program *Program) SetMaterial(material Material) {
-	program.SetColor(MATERIAL_COLOR_UNIFORM, material.Color)
+	for _, uniform := range uniforms {
+		name, value := uniform.Name, uniform.Value
 
-	texture := material.Textures[0]
-
-	texture.Bind(gl.TEXTURE0)
-	program.SetTexture(MATERIAL_TEXTURE0_UNIFORM, texture)
+		switch value.(type) {
+		case structs.Color:
+			{
+				program.SetColor(name, value.(structs.Color))
+			}
+		case core.Texture:
+			{
+				program.SetTexture(name, value.(core.Texture))
+			}
+		}
+	}
 }
 
-func (program *Program) SetColor(uniform string, color color.Color) {
+func (program *Program) SetColor(uniform string, color structs.Color) {
 	location := program.getUniformLocation(uniform)
 
 	r, g, b, _ := color.Unpack()
@@ -79,19 +89,13 @@ func (program *Program) SetMVP(model, view, projection *mgl32.Mat4) {
 	program.SetMatrix(PROGRAM_PROJ_MATRIX_UNIFORM, projection)
 }
 
-// for instanced rendering
-func (program *Program) SetVP(view, projection *mgl32.Mat4) {
-	program.SetMatrix(PROGRAM_VIEW_MATRIX_UNIFORM, view)
-	program.SetMatrix(PROGRAM_PROJ_MATRIX_UNIFORM, projection)
-}
-
 func (program *Program) SetMatrix(uniform string, matrix *mgl32.Mat4) {
 	location := program.getUniformLocation(uniform)
 
 	gl.UniformMatrix4fv(location, 1, false, &matrix[0])
 }
 
-func (program *Program) SetTexture(uniform string, texture Texture) {
+func (program *Program) SetTexture(uniform string, texture core.Texture) {
 	location := program.getUniformLocation(uniform)
 
 	gl.Uniform1i(location, int32(texture.Unit()-gl.TEXTURE0))
@@ -100,7 +104,6 @@ func (program *Program) SetTexture(uniform string, texture Texture) {
 // set uniforms
 
 func (program *Program) getUniformLocation(uniform string) int32 {
-
 	location, ok := program.uniformCache[uniform]
 
 	if !ok {
@@ -108,7 +111,6 @@ func (program *Program) getUniformLocation(uniform string) int32 {
 		defer free()
 
 		location = gl.GetUniformLocation(program.id, *uniformName)
-
 		program.uniformCache[uniform] = location
 	}
 

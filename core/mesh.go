@@ -10,12 +10,6 @@ type Mesh struct {
 	indices  []uint32
 }
 
-type MeshBuilder struct {
-	attributes uint16
-	vertices   []float32
-	indices    []uint32
-}
-
 type MeshAttribute struct {
 	count int32
 	xsize int32
@@ -75,6 +69,10 @@ func (mesh *Mesh) SetAttributes(attributes ...MeshAttribute) {
 	}
 
 	mesh.Unbind()
+}
+
+func (mesh *Mesh) IndexCount() int {
+	return len(mesh.indices)
 }
 
 //

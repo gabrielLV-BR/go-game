@@ -1,4 +1,4 @@
-package color
+package structs
 
 type Color struct {
 	R float32

@@ -6,6 +6,11 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
+const (
+	CAMERA_PITCH_MIN = -math.Pi/2.0 + 0.1
+	CAMERA_PITCH_MAX = +math.Pi/2.0 - 0.1
+)
+
 type Camera struct {
 	position mgl32.Vec3
 
@@ -82,6 +87,8 @@ func (camera *Camera) SetPosition(position mgl32.Vec3) {
 func (camera *Camera) Rotate(yawSpeed, pitchSpeed float32) {
 	camera.pitch += pitchSpeed
 	camera.yaw -= yawSpeed
+
+	mgl32.Clamp(camera.pitch, CAMERA_PITCH_MIN, CAMERA_PITCH_MAX)
 
 	camera.dirty = true
 }
