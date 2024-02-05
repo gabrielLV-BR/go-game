@@ -68,17 +68,7 @@ func main() {
 		core.MeshAttributes.UV(),
 	)
 
-	phongMaterial := materials.PhongMaterial {
-		Color: structs.Colors.White(),
-		AmbientLight: core.AmbientLight{
-			Color: structs.NewColor(0.7, 0.5, 0.3, 1.0),
-		},
-		PointLights: []core.PointLight{
-			{
-				Position: mgl32.Vec3{0.4, 1.0, 0.3},
-				Color: structs.NewColor(1.0, 0.3, 0.3, 1.0),
-			},
-		},
+	material := materials.ColorMaterial {
 	}
 
 	transform := structs.NewTransform()
@@ -97,7 +87,7 @@ func main() {
 		renderer.Clear()
 		pass := renderer.BeginDraw(&camera)
 
-		pass.DrawMesh(mesh, transform, &phongMaterial)
+		pass.DrawMesh(mesh, transform, &material)
 
 		pass.EndDraw()
 

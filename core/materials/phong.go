@@ -7,9 +7,7 @@ import (
 
 type PhongMaterial struct {
 	Color structs.Color
-	DiffuseMaps []core.Texture
-	AmbientLight core.AmbientLight
-	PointLights []core.PointLight
+	Diffuse core.Texture
 }
 
 func (material *PhongMaterial) Id() core.MaterialId {
@@ -17,24 +15,10 @@ func (material *PhongMaterial) Id() core.MaterialId {
 }
 
 func (material *PhongMaterial) Uniforms() []core.UniformDescriptor {
-	isTextured := len(material.DiffuseMaps) > 0
-
 	return []core.UniformDescriptor {
 		{
-			Name: "uAmbientLight",
-			Value: material.AmbientLight,
-		},
-		{
-			Name: "uPointLight",
-			Value: material.PointLights[0],
-		},
-		{
 			Name: "uTexture",
-			Value: material.DiffuseMaps,
-		},
-		{
-			Name: "uIsTextured",
-			Value: isTextured,
+			Value: material.Diffuse,
 		},
 		{
 			Name: "uColor",

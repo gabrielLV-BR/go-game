@@ -87,10 +87,6 @@ func (program *Program) trySetUniform(name string, value interface{}) error {
 		program.SetAmbientLight(name, value)
 	case core.PointLight:
 		program.SetPointLight(name, value)
-	case []interface{}:
-		for i, u := range value {
-			program.trySetUniform(fmt.Sprintf("%s[%d]", name, i), u)
-		}
 	default:
 		return errors.New(fmt.Sprintf("Unknown uniform %s of type %s", name, reflect.TypeOf(value).Name()))
 	}
