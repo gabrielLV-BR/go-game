@@ -44,7 +44,7 @@ func (renderer *Renderer) LoadDefaultMaterials() error {
 	defaultMaterials := []string{
 		"color",
 		"texture",
-		"texture_instanced",
+		"phong",
 	}
 
 	const root string = "assets/shaders/"

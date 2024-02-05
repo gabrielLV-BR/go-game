@@ -49,10 +49,11 @@ func main() {
 	}
 
 	vertices := []float32{
-		-0.5, -0.5, 0.0, 0.0, 0.0,
-		-0.5, 0.5, 0.0, 0.0, 1.0,
-		0.5, 0.5, 0.0, 1.0, 1.0,
-		0.5, -0.5, 0.0, 1.0, 0.0,
+		// POSITION        // NORMAL         // UV
+		-0.5, -0.5,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0,
+		-0.5,  0.5,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,
+		 0.5,  0.5,  0.0,  0.0,  0.0,  1.0,  1.0,  1.0,
+		 0.5, -0.5,  0.0,  1.0,  0.0,  1.0,  1.0,  0.0,
 	}
 
 	indices := []uint32{
@@ -63,19 +64,21 @@ func main() {
 	mesh := core.NewMesh(vertices, indices)
 	mesh.SetAttributes(
 		core.MeshAttributes.Position(),
+		core.MeshAttributes.Normal(),
 		core.MeshAttributes.UV(),
 	)
 
-	// render renderer mf
-
-	diffuse, err := core.LoadTexture("assets/textures/smile.png")
-	if err != nil {
-		panic(err)
-	}
-
-	textureMaterial := materials.TextureMaterial{
-		Texture: diffuse,
-		Color:   structs.Colors.White(),
+	phongMaterial := materials.PhongMaterial {
+		Color: structs.Colors.White(),
+		AmbientLight: core.AmbientLight{
+			Color: structs.NewColor(0.7, 0.5, 0.3, 1.0),
+		},
+		PointLights: []core.PointLight{
+			{
+				Position: mgl32.Vec3{0.4, 1.0, 0.3},
+				Color: structs.NewColor(1.0, 0.3, 0.3, 1.0),
+			},
+		},
 	}
 
 	transform := structs.NewTransform()
@@ -94,7 +97,7 @@ func main() {
 		renderer.Clear()
 		pass := renderer.BeginDraw(&camera)
 
-		pass.DrawMesh(mesh, transform, &textureMaterial)
+		pass.DrawMesh(mesh, transform, &phongMaterial)
 
 		pass.EndDraw()
 
