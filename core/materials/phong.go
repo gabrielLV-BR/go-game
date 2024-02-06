@@ -14,18 +14,6 @@ func (material *PhongMaterial) Id() core.MaterialId {
 	return "phong"
 }
 
-func (material *PhongMaterial) Uniforms() []core.UniformDescriptor {
-	return []core.UniformDescriptor {
-		{
-			Name: "uTexture",
-			Value: material.Diffuse,
-		},
-		{
-			Name: "uColor",
-			Value: material.Color,
-		},
-	}
+func (material *PhongMaterial) Prepare(shader core.Shader) {
 }
-
-func (material *PhongMaterial) Prepare() {}
 

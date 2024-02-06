@@ -3,6 +3,7 @@ package renderer
 import (
 	"gabriellv/game/core"
 	"gabriellv/game/structs"
+	"os"
 	"path/filepath"
 	"reflect"
 
@@ -11,7 +12,7 @@ import (
 )
 
 type Renderer struct {
-	programMap map[core.MaterialId]Program
+	shaderMap map[core.MaterialId]core.Shader
 }
 
 type RenderPass struct {
@@ -31,16 +32,15 @@ func NewRenderer(window core.Window) (Renderer, error) {
 
 	gl.Viewport(0, 0, int32(width), int32(height))
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
-
 	gl.Enable(gl.DEPTH_TEST)
 
-	renderer.programMap = make(map[core.MaterialId]Program)
+	renderer.shaderMap = make(map[core.MaterialId]core.Shader)
 
 	return renderer, nil
 }
 
+//TODO put this into config file
 func (renderer *Renderer) LoadDefaultMaterials() error {
-	//TODO put this into config file
 	defaultMaterials := []string{
 		"color",
 		"texture",
@@ -50,38 +50,40 @@ func (renderer *Renderer) LoadDefaultMaterials() error {
 	const root string = "assets/shaders/"
 
 	for _, material := range defaultMaterials {
+		newShader := core.NewShader()
+
 		vertexPath := filepath.Join(root, material+".vert.glsl")
 		fragPath := filepath.Join(root, material+".frag.glsl")
 
-		vertexShader, err := LoadShader(vertexPath, gl.VERTEX_SHADER)
-		if err != nil {
+		vertexSource, err := os.ReadFile(vertexPath)
+		if err != nil { return err }
+
+		fragmentSource, err := os.ReadFile(fragPath)
+		if err != nil { return err }
+
+		if err := newShader.LoadStageSource(string(vertexSource), gl.VERTEX_SHADER) ; err != nil {
 			return err
 		}
 
-		fragShader, err := LoadShader(fragPath, gl.FRAGMENT_SHADER)
-		if err != nil {
+		if err := newShader.LoadStageSource(string(fragmentSource), gl.FRAGMENT_SHADER) ; err != nil {
 			return err
 		}
 
-		program, err := NewProgram(vertexShader, fragShader)
-		if err != nil {
+		if err := newShader.Link(); err != nil {
 			return err
 		}
 
-		gl.DeleteShader(vertexShader.id)
-		gl.DeleteShader(fragShader.id)
-
-		renderer.programMap[core.MaterialId(material)] = program
+		renderer.shaderMap[core.MaterialId(material)] = newShader
 	}
 
 	return nil
 }
 
-func (renderer *Renderer) GetProgramFor(material core.Material) Program {
-	program, ok := renderer.programMap[material.Id()]
+func (renderer *Renderer) GetShaderFor(material core.Material) core.Shader {
+	program, ok := renderer.shaderMap[material.Id()]
 
 	if !ok {
-		panic("No program for material")
+		panic("No shader for material")
 	}
 
 	return program
@@ -109,15 +111,14 @@ func (renderer *Renderer) Clear() {
 
 func (pass *RenderPass) DrawMesh(mesh core.Mesh, transform structs.Transform, material core.Material) {
 	// get program from material
-	program := pass.renderer.GetProgramFor(material)
-	program.Bind()
+	shader := pass.renderer.GetShaderFor(material)
+	shader.Bind()
 
-	material.Prepare()
-	program.SetMaterial(material)
+	material.Prepare(shader)
 
 	model := transform.ModelMatrix()
 
-	program.SetMVP(&model, &pass.viewMatrix, &pass.projectionMatrix)
+	shader.SetMVP(&model, &pass.viewMatrix, &pass.projectionMatrix)
 
 	mesh.Bind()
 
@@ -128,7 +129,7 @@ func (pass *RenderPass) DrawMesh(mesh core.Mesh, transform structs.Transform, ma
 		nil,
 	)
 
-	program.Unbind()
+	shader.Unbind()
 	mesh.Unbind()
 }
 
@@ -154,10 +155,12 @@ func (pass *RenderPass) DrawMeshInstanced(mesh core.Mesh, material core.Material
 
 	//
 
-	program := pass.renderer.GetProgramFor(material)
-	program.Bind()
-	program.SetMaterial(material)
-	program.SetMVP(&transforms[0], &pass.viewMatrix, &pass.projectionMatrix)
+	shader := pass.renderer.GetShaderFor(material)
+	shader.Bind()
+
+	material.Prepare(shader)
+
+	shader.SetMVP(&transforms[0], &pass.viewMatrix, &pass.projectionMatrix)
 
 	gl.DrawElementsInstanced(
 		gl.TRIANGLES,
@@ -167,6 +170,6 @@ func (pass *RenderPass) DrawMeshInstanced(mesh core.Mesh, material core.Material
 		int32(len(transforms)),
 	)
 
-	program.Unbind()
+	shader.Unbind()
 	mesh.Unbind()
 }
