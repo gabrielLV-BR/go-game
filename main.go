@@ -31,67 +31,43 @@ func init() {
 
 func main() {
 	window, err := core.NewWindow(WIDTH, HEIGHT, TITLE)
+	if err != nil {
+		panic(err)
+	}
+
 	defer window.Destroy()
 
 	window.SetupInputSystem()
 
-	if err != nil {
-		panic(err)
-	}
-
 	renderer, err := renderer.NewRenderer(window)
-
 	if err != nil {
 		panic(err)
 	}
 
-	if err := renderer.LoadDefaultMaterials(); err != nil {
+	err = renderer.LoadDefaultMaterials()
+	if err != nil {
 		panic(err)
 	}
 
 	diffuse, err := core.LoadTexture("assets/textures/smile.png")
-
-	if err != nil { panic(err) }
-
-	vertices := []float32{
-		// POSITION        // NORMAL         // UV
-		-0.5, -0.5,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0,
-		-0.5,  0.5,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,
-		 0.5,  0.5,  0.0,  0.0,  0.0,  1.0,  1.0,  1.0,
-		 0.5, -0.5,  0.0,  1.0,  0.0,  1.0,  1.0,  0.0,
+	if err != nil {
+		panic(err)
 	}
 
-	indices := []uint32{
-		0, 1, 2,
-		2, 3, 0,
+	obj, err := loaders.LoadObj("assets/models/cone.obj")
+	if err != nil {
+		panic(err)
 	}
 
-	obj := loaders.LoadObj("assets/models/cube.obj")
-
-	vertSlices := make([]float32, len(obj.Vertices) * 8)
-
-	for _, v := range obj.Vertices {
-		println(v.Position.X(), v.Position.Y(), v.Position.Z(), v.Normal.X(), v.Normal.Y(), v.Normal.Z(), v.UV.X(), v.UV.Y())
-
-		vertSlices = append(vertSlices, v.Position.X(), v.Position.Y(), v.Position.Z(), v.Normal.X(), v.Normal.Y(), v.Normal.Z(), v.UV.X(), v.UV.Y())
-	}
-
-	mesh2 := core.NewMesh(vertSlices, obj.Indices)
+	mesh2 := core.NewMesh(obj.Vertices, obj.Indices)
 	mesh2.SetAttributes(
 		core.MeshAttributes.Position(),
 		core.MeshAttributes.Normal(),
 		core.MeshAttributes.UV(),
 	)
 
-	mesh := core.NewMesh(vertices, indices)
-	mesh.SetAttributes(
-		core.MeshAttributes.Position(),
-		core.MeshAttributes.Normal(),
-		core.MeshAttributes.UV(),
-	)
-
-	material := materials.TextureMaterial {
-		Color: structs.Colors.White(),
+	material := materials.TextureMaterial{
+		Color:   structs.Colors.White(),
 		Texture: diffuse,
 	}
 

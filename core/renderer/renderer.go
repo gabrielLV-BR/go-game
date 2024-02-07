@@ -39,7 +39,7 @@ func NewRenderer(window core.Window) (Renderer, error) {
 	return renderer, nil
 }
 
-//TODO put this into config file
+// TODO put this into config file
 func (renderer *Renderer) LoadDefaultMaterials() error {
 	defaultMaterials := []string{
 		"color",
@@ -56,16 +56,20 @@ func (renderer *Renderer) LoadDefaultMaterials() error {
 		fragPath := filepath.Join(root, material+".frag.glsl")
 
 		vertexSource, err := os.ReadFile(vertexPath)
-		if err != nil { return err }
-
-		fragmentSource, err := os.ReadFile(fragPath)
-		if err != nil { return err }
-
-		if err := newShader.LoadStageSource(string(vertexSource), gl.VERTEX_SHADER) ; err != nil {
+		if err != nil {
 			return err
 		}
 
-		if err := newShader.LoadStageSource(string(fragmentSource), gl.FRAGMENT_SHADER) ; err != nil {
+		fragmentSource, err := os.ReadFile(fragPath)
+		if err != nil {
+			return err
+		}
+
+		if err := newShader.LoadStageSource(string(vertexSource), gl.VERTEX_SHADER); err != nil {
+			return err
+		}
+
+		if err := newShader.LoadStageSource(string(fragmentSource), gl.FRAGMENT_SHADER); err != nil {
 			return err
 		}
 

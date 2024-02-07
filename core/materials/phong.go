@@ -6,7 +6,7 @@ import (
 )
 
 type PhongMaterial struct {
-	Color structs.Color
+	Color   structs.Color
 	Diffuse core.Texture
 }
 

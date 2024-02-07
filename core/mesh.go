@@ -1,12 +1,15 @@
 package core
 
 import (
+	"gabriellv/game/structs"
+	"reflect"
+
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 type Mesh struct {
 	vao      uint32
-	vertices []float32
+	vertices []structs.Vertex
 	indices  []uint32
 }
 
@@ -16,13 +19,13 @@ type MeshAttribute struct {
 	xtype uint32
 }
 
-func NewMesh(vertices []float32, indices []uint32) Mesh {
+func NewMesh(vertices []structs.Vertex, indices []uint32) Mesh {
 	var vao uint32
 	var vbo uint32
 	var ebo uint32
 
-	vertices_size := len(vertices) * 4
-	indices_size := len(indices) * 4
+	vertices_size := len(vertices) * int(reflect.TypeOf(vertices).Elem().Size())
+	indices_size := len(indices) * int(reflect.TypeOf(indices).Elem().Size())
 
 	// vao
 	gl.GenVertexArrays(1, &vao)

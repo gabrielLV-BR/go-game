@@ -18,15 +18,15 @@ const (
 )
 
 type Shader struct {
-	program uint32
-	stages []uint32
+	program      uint32
+	stages       []uint32
 	uniformCache map[string]int32
 }
 
 func NewShader() Shader {
 	return Shader{
-		program: 0,
-		stages: []uint32{},
+		program:      0,
+		stages:       []uint32{},
 		uniformCache: make(map[string]int32),
 	}
 }
@@ -70,6 +70,7 @@ func (shader *Shader) Bind() {
 func (shader *Shader) Unbind() {
 	gl.UseProgram(0)
 }
+
 // uniform handling code
 
 func (shader *Shader) getUniformLocation(uniform string) int32 {
