@@ -2,11 +2,11 @@
 
 out vec4 outColor;
 
+in vec3 aNormal;
 in vec2 aUV;
 
 uniform vec3 uColor;
-uniform sampler2D uTexture0;
 
 void main() {
-	outColor = texture(uTexture0, aUV) * vec4(uColor, 1.0);
+	outColor = vec4(uColor, 1.0) * vec4(aUV.xy, aNormal.z, 1.0);
 }

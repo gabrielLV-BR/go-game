@@ -15,5 +15,5 @@ func (material *PhongMaterial) Id() core.MaterialId {
 }
 
 func (material *PhongMaterial) Prepare(shader core.Shader) {
-}
 
+}

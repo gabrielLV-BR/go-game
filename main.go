@@ -6,6 +6,7 @@ import (
 	"gabriellv/game/core/materials"
 	"gabriellv/game/core/renderer"
 	"gabriellv/game/core/systems"
+	"gabriellv/game/loaders"
 	"gabriellv/game/structs"
 	"runtime"
 
@@ -48,6 +49,10 @@ func main() {
 		panic(err)
 	}
 
+	diffuse, err := core.LoadTexture("assets/textures/smile.png")
+
+	if err != nil { panic(err) }
+
 	vertices := []float32{
 		// POSITION        // NORMAL         // UV
 		-0.5, -0.5,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0,
@@ -61,6 +66,23 @@ func main() {
 		2, 3, 0,
 	}
 
+	obj := loaders.LoadObj("assets/models/cube.obj")
+
+	vertSlices := make([]float32, len(obj.Vertices) * 8)
+
+	for _, v := range obj.Vertices {
+		println(v.Position.X(), v.Position.Y(), v.Position.Z(), v.Normal.X(), v.Normal.Y(), v.Normal.Z(), v.UV.X(), v.UV.Y())
+
+		vertSlices = append(vertSlices, v.Position.X(), v.Position.Y(), v.Position.Z(), v.Normal.X(), v.Normal.Y(), v.Normal.Z(), v.UV.X(), v.UV.Y())
+	}
+
+	mesh2 := core.NewMesh(vertSlices, obj.Indices)
+	mesh2.SetAttributes(
+		core.MeshAttributes.Position(),
+		core.MeshAttributes.Normal(),
+		core.MeshAttributes.UV(),
+	)
+
 	mesh := core.NewMesh(vertices, indices)
 	mesh.SetAttributes(
 		core.MeshAttributes.Position(),
@@ -68,7 +90,9 @@ func main() {
 		core.MeshAttributes.UV(),
 	)
 
-	material := materials.ColorMaterial {
+	material := materials.TextureMaterial {
+		Color: structs.Colors.White(),
+		Texture: diffuse,
 	}
 
 	transform := structs.NewTransform()
@@ -87,7 +111,7 @@ func main() {
 		renderer.Clear()
 		pass := renderer.BeginDraw(&camera)
 
-		pass.DrawMesh(mesh, transform, &material)
+		pass.DrawMesh(mesh2, transform, &material)
 
 		pass.EndDraw()
 

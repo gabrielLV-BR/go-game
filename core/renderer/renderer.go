@@ -110,15 +110,14 @@ func (renderer *Renderer) Clear() {
 }
 
 func (pass *RenderPass) DrawMesh(mesh core.Mesh, transform structs.Transform, material core.Material) {
+	model := transform.ModelMatrix()
+
 	// get program from material
 	shader := pass.renderer.GetShaderFor(material)
 	shader.Bind()
+	shader.SetMVP(&model, &pass.viewMatrix, &pass.projectionMatrix)
 
 	material.Prepare(shader)
-
-	model := transform.ModelMatrix()
-
-	shader.SetMVP(&model, &pass.viewMatrix, &pass.projectionMatrix)
 
 	mesh.Bind()
 

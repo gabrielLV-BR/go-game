@@ -3,8 +3,6 @@ package materials
 import (
 	"gabriellv/game/core"
 	"gabriellv/game/structs"
-
-	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 type TextureMaterial struct {
@@ -17,5 +15,6 @@ func (material *TextureMaterial) Id() core.MaterialId {
 }
 
 func (material *TextureMaterial) Prepare(shader core.Shader) {
-	material.Texture.Bind(gl.TEXTURE0)
+	shader.SetColor("uColor", material.Color)
+	// shader.SetTexture("uTexture0", material.Texture)
 }
