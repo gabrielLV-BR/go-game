@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"gabriellv/game/structs"
 	"os"
 	"strings"
 
@@ -12,7 +11,7 @@ import (
 )
 
 type Object struct {
-	Vertices []structs.Vertex
+	Vertices []float32
 	Indices  []uint32
 }
 
@@ -152,14 +151,19 @@ func parseFace(line string) (faceData, error) {
 	return data, err
 }
 
+// used in the mapping
+type triple struct {
+	a, b, c uint32
+}
+
 func (data *objData) buildMesh() (Object, error) {
 	object := Object{
-		Vertices: []structs.Vertex{},
+		Vertices: []float32{},
 		Indices:  []uint32{},
 	}
 
 	index := uint32(0)
-	vertexToIndex := make(map[structs.Vertex]uint32)
+	vertexToIndex := make(map[triple]uint32)
 
 	if len(data.position_indices) != len(data.normal_indices) ||
 		len(data.position_indices) != len(data.uv_indices) {
@@ -171,21 +175,29 @@ func (data *objData) buildMesh() (Object, error) {
 		normal_index := data.normal_indices[i] - 1
 		uv_index := data.uv_indices[i] - 1
 
-		vertex := structs.Vertex{
-			Position: data.positions[position_index],
-			Normal:   data.normals[normal_index],
-			UV:       data.uvs[uv_index],
+		triple := triple{
+			position_index, normal_index, uv_index,
 		}
 
-		indx, ok := vertexToIndex[vertex]
+		indx, ok := vertexToIndex[triple]
 
 		if ok {
 			// already in, just add index
 			object.Indices = append(object.Indices, indx)
 		} else {
-			vertexToIndex[vertex] = index
-			object.Vertices = append(object.Vertices, vertex)
+
+			position := data.positions[position_index]
+			normal := data.normals[normal_index]
+			uv := data.uvs[uv_index]
+
+			vertexToIndex[triple] = index
+			object.Vertices = append(object.Vertices,
+				position[0], position[1], position[2],
+				normal[0], normal[1], normal[2],
+				uv[0], uv[1],
+			)
 			object.Indices = append(object.Indices, index)
+
 			index += 1
 		}
 	}

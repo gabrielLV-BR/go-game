@@ -102,9 +102,11 @@ func (camera *Camera) recalculateViewMatrix() {
 
 	target := camera.position.Add(direction.Mul(10.0))
 
-	camera.viewMatrix = mgl32.LookAtV(
-		camera.position, target, up,
-	)
+	camera.LookAt(target, up)
+}
+
+func (camera *Camera) LookAt(target, up mgl32.Vec3) {
+	camera.viewMatrix = mgl32.LookAtV(camera.position, target, up)
 
 	camera.dirty = false
 }

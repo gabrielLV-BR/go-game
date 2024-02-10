@@ -1,7 +1,6 @@
 package core
 
 import (
-	"gabriellv/game/structs"
 	"reflect"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -9,7 +8,7 @@ import (
 
 type Mesh struct {
 	vao      uint32
-	vertices []structs.Vertex
+	vertices []float32
 	indices  []uint32
 }
 
@@ -19,7 +18,7 @@ type MeshAttribute struct {
 	xtype uint32
 }
 
-func NewMesh(vertices []structs.Vertex, indices []uint32) Mesh {
+func NewMesh(vertices []float32, indices []uint32) Mesh {
 	var vao uint32
 	var vbo uint32
 	var ebo uint32

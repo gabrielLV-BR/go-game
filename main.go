@@ -4,7 +4,7 @@ import (
 	"gabriellv/game/core"
 	"gabriellv/game/core/controllers"
 	"gabriellv/game/core/materials"
-	"gabriellv/game/core/renderer"
+	"gabriellv/game/core/rendering"
 	"gabriellv/game/core/systems"
 	"gabriellv/game/loaders"
 	"gabriellv/game/structs"
@@ -39,12 +39,17 @@ func main() {
 
 	window.SetupInputSystem()
 
-	renderer, err := renderer.NewRenderer(window)
+	renderer, err := rendering.NewRenderer(window)
 	if err != nil {
 		panic(err)
 	}
 
 	err = renderer.LoadDefaultMaterials()
+	if err != nil {
+		panic(err)
+	}
+
+	shapeRenderer, err := rendering.NewShapeRenderer()
 	if err != nil {
 		panic(err)
 	}
@@ -59,8 +64,8 @@ func main() {
 		panic(err)
 	}
 
-	mesh2 := core.NewMesh(obj.Vertices, obj.Indices)
-	mesh2.SetAttributes(
+	mesh := core.NewMesh(obj.Vertices, obj.Indices)
+	mesh.SetAttributes(
 		core.MeshAttributes.Position(),
 		core.MeshAttributes.Normal(),
 		core.MeshAttributes.UV(),
@@ -77,6 +82,12 @@ func main() {
 	camera.UsePerspectiveProjection(80.0, window.AspectRatio(), 0.1, 1000.0)
 	camera.SetPosition(mgl32.Vec3{0.0, 0.0, -1.0})
 
+	width, height := window.Size()
+	ortho := structs.NewCamera()
+	ortho.UseOrthogonalProjection(float32(width), float32(height), 0.0, 1000.0)
+	ortho.SetPosition(mgl32.Vec3{0.0, 0.0, -1.0})
+	ortho.LookAt(mgl32.Vec3{}, mgl32.Vec3{0, 1, 0})
+
 	fpsController := controllers.FPSCameraController{}
 	fpsController.Speed = 20.0
 	fpsController.MouseSensitivity = 1
@@ -87,7 +98,18 @@ func main() {
 		renderer.Clear()
 		pass := renderer.BeginDraw(&camera)
 
-		pass.DrawMesh(mesh2, transform, &material)
+		pass.DrawMesh(mesh, transform, &material)
+
+		pass.EndDraw()
+
+		pass = renderer.BeginDraw(&camera)
+
+		shapeRenderer.DrawQuad(
+			&pass,
+			mgl32.Vec3{1.5, 1.2, 0.0},
+			mgl32.Vec3{1.0, 1.0, 1.0},
+			structs.Colors.White(),
+		)
 
 		pass.EndDraw()
 
