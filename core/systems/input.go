@@ -41,6 +41,12 @@ func (input *inputSystem) Update() {
 	input.lastMousePosition = input.mousePosition
 }
 
+func (input *inputSystem) IsKeyDown(key glfw.Key) bool {
+	val, ok := input.keys[key]
+
+	return ok && val > 0.5
+}
+
 func (input *inputSystem) GetAxis(neg, pos glfw.Key) float32 {
 	negative, ok := input.keys[neg]
 

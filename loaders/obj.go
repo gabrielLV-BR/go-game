@@ -10,12 +10,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-type Object struct {
-	Vertices []float32
-	Indices  []uint32
-}
-
-func LoadObj(path string) (Object, error) {
+func LoadFromFile(path string) (Object, error) {
 	contents, err := os.ReadFile(path)
 
 	if err != nil {
