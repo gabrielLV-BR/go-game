@@ -13,6 +13,6 @@ uniform mat4 uProj;
 
 void main() {
 	gl_Position = uProj * uView * uModel * vec4(inPosition, 1.0);
-	aNormal = inNormal;
 	aUV = inUV;
+	aNormal = inNormal;
 }
