@@ -88,7 +88,7 @@ func (camera *Camera) Rotate(yawSpeed, pitchSpeed float32) {
 	camera.pitch += pitchSpeed
 	camera.yaw -= yawSpeed
 
-	mgl32.Clamp(camera.pitch, CAMERA_PITCH_MIN, CAMERA_PITCH_MAX)
+	camera.pitch = mgl32.Clamp(camera.pitch, CAMERA_PITCH_MIN, CAMERA_PITCH_MAX)
 
 	camera.dirty = true
 }
