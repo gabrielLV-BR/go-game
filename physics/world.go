@@ -1,6 +1,8 @@
 package physics
 
 import (
+	"gabriellv/game/physics/shapes"
+
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -10,6 +12,14 @@ var (
 
 type PhysicsWorld struct {
 	bodies []PhysicsBody
+}
+
+func (world *PhysicsWorld) AddPhysicsBody(body PhysicsBody) int {
+	index := len(world.bodies)
+
+	world.bodies = append(world.bodies, body)
+
+	return index
 }
 
 func (world *PhysicsWorld) Update(delta float32) {
@@ -31,12 +41,40 @@ func (world *PhysicsWorld) Update(delta float32) {
 				continue
 			}
 
-			if !BoundingBoxCollide(body1.BoundingBox, body2.BoundingBox) {
+			if !shapes.BoundingBoxCollide(
+				body1.TransformedBoundingBox(),
+				body2.TransformedBoundingBox(),
+			) {
 				continue
 			}
 
-			if GJKCollide(body1.Shape, body2.Shape) {
-				//TODO resolve collision
+			// for now, will only check on spheres to
+			// make sure collision response is working
+
+			var sphere1, sphere2 *shapes.SphereShape
+			var ok bool
+
+			sphere1, ok = body1.Shape.(*shapes.SphereShape)
+			if !ok {
+				continue
+			}
+
+			sphere2, ok = body2.Shape.(*shapes.SphereShape)
+			if !ok {
+				continue
+			}
+
+			penetration := shapes.SpheresPenetrationVector(
+				*sphere1, body1.Transform.Position,
+				*sphere2, body2.Transform.Position,
+			)
+
+			if penetration.Len() > 0 {
+				// dumb static resolve
+				penetration = penetration.Mul(0.5)
+
+				body1.Transform.Position.Sub(penetration)
+				body2.Transform.Position.Sub(penetration)
 			}
 		}
 	}

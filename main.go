@@ -9,6 +9,8 @@ import (
 	"gabriellv/game/gamedata"
 	"gabriellv/game/gamedata/entities"
 	"gabriellv/game/loaders"
+	"gabriellv/game/physics"
+	"gabriellv/game/physics/shapes"
 	"gabriellv/game/structs"
 	"runtime"
 
@@ -75,6 +77,17 @@ func main() {
 			MouseSensitivity: 1.0,
 		}
 
+		body := physics.PhysicsBody{
+			Transform: structs.NewTransform(),
+			Shape: &shapes.SphereShape{
+				Radius: 10.0,
+			},
+			Type:   physics.PHYSICS_BODY_TYPE_DYNAMIC,
+			Weight: 15.0,
+		}
+
+		player.BodyId = gameState.PhysicsWorld.AddPhysicsBody(body)
+
 		gameState.AddEntity(&player)
 	}
 
@@ -107,12 +120,17 @@ func main() {
 		gameState.AddEntity(&ent)
 	}
 
+	lastTime, now := 0.0, 0.0
+
 	for !window.ShouldClose() {
+		delta := now - lastTime
 
 		// Update fase
 		for _, ent := range gameState.Entities {
-			ent.Update(&gameState, 0.16)
+			ent.Update(&gameState, float32(delta))
 		}
+
+		gameState.PhysicsWorld.Update(float32(delta))
 
 		// Rendering fase
 		renderer.Clear()
@@ -128,5 +146,8 @@ func main() {
 		systems.InputSystem.Update()
 
 		window.PollAndSwap()
+
+		lastTime = now
+		now = core.GetTime()
 	}
 }

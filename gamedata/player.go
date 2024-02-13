@@ -9,7 +9,7 @@ type Player struct {
 	// get the model and do stuff with it :)
 	Controller controllers.FPSCameraController
 	//TODO when implementing physics
-	//BodyId uint32
+	BodyId int
 }
 
 func (player *Player) Update(state *State, delta float32) {

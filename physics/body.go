@@ -1,6 +1,7 @@
 package physics
 
 import (
+	"gabriellv/game/physics/shapes"
 	"gabriellv/game/structs"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -16,9 +17,8 @@ const (
 )
 
 type PhysicsBody struct {
-	Transform   structs.Transform
-	Shape       PhysicsShape
-	BoundingBox BoundingBox
+	Transform structs.Transform
+	Shape     shapes.PhysicsShape
 
 	// for now, I'll stick to Euler's integration for movement
 	// I do know about the supposed superior numerical stability
@@ -41,6 +41,9 @@ type PhysicsBody struct {
 	// FrictionCoefficient float32
 }
 
-type PhysicsShape interface {
-	SupportPoint(dir mgl32.Vec3) mgl32.Vec3
+func (body *PhysicsBody) TransformedBoundingBox() shapes.BoundingBox {
+	return body.Shape.
+		BoundingBox().
+		CenteredAt(body.Transform.Position).
+		Scaled(body.Transform.Scale)
 }

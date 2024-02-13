@@ -2,6 +2,7 @@ package gamedata
 
 import (
 	"gabriellv/game/core"
+	"gabriellv/game/physics"
 	"gabriellv/game/structs"
 )
 
@@ -10,6 +11,8 @@ type State struct {
 
 	Entities []Entity
 	Models   []core.Model
+
+	PhysicsWorld physics.PhysicsWorld
 }
 
 func (state *State) AddModel(model core.Model) int {
