@@ -64,7 +64,7 @@ func main() {
 	}
 
 	gameState := gamedata.State{}
-	gameState.Camera = structs.NewCamera()
+	*gameState.Camera = structs.NewCamera()
 	gameState.Camera.UsePerspectiveProjection(80.0, window.AspectRatio(), 0.1, 1000.0)
 	gameState.Camera.SetPosition(mgl32.Vec3{0.0, 0.0, -1.0})
 
@@ -88,7 +88,7 @@ func main() {
 
 		player.BodyId = gameState.PhysicsWorld.AddPhysicsBody(body)
 
-		gameState.AddEntity(&player)
+		gameState.Scene.AddEntity(&player)
 	}
 
 	{ // Spining object entity
@@ -116,8 +116,8 @@ func main() {
 			Transform: transform,
 		}
 
-		ent.ModelId = gameState.AddModel(model)
-		gameState.AddEntity(&ent)
+		ent.ModelId = gameState.Scene.AddModel(model)
+		gameState.Scene.AddEntity(&ent)
 	}
 
 	lastTime, now := 0.0, 0.0
@@ -126,7 +126,7 @@ func main() {
 		delta := now - lastTime
 
 		// Update fase
-		for _, ent := range gameState.Entities {
+		for _, ent := range gameState.Scene.Entities {
 			ent.Update(&gameState, float32(delta))
 		}
 
@@ -134,9 +134,9 @@ func main() {
 
 		// Rendering fase
 		renderer.Clear()
-		pass := renderer.BeginDraw(&gameState.Camera)
+		pass := renderer.BeginDraw(gameState.Camera)
 
-		for _, model := range gameState.Models {
+		for _, model := range gameState.Scene.Models {
 			pass.DrawMesh(model.Mesh, model.Transform, model.Material)
 		}
 

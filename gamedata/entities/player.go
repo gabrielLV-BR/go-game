@@ -1,7 +1,8 @@
-package gamedata
+package entities
 
 import (
 	"gabriellv/game/controllers"
+	"gabriellv/game/gamedata"
 )
 
 type Player struct {
@@ -12,6 +13,6 @@ type Player struct {
 	BodyId int
 }
 
-func (player *Player) Update(state *State, delta float32) {
-	player.Controller.Update(&state.Camera, delta)
+func (player *Player) Update(state *gamedata.State, delta float32) {
+	player.Controller.Update(state.Camera, delta)
 }

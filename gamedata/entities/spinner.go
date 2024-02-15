@@ -14,7 +14,7 @@ type SpinningEntity struct {
 }
 
 func (ent *SpinningEntity) Update(state *gamedata.State, delta float32) {
-	model := &state.Models[ent.ModelId]
+	model := &state.Scene.Models[ent.ModelId]
 
 	model.Transform.Rotation = mgl32.EulerToQuat(0.0, ent.rotation, 0.0)
 
