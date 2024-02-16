@@ -71,7 +71,7 @@ func main() {
 	{ // Player creation
 		//TODO load this kind of stuff from a file
 
-		player := gamedata.Player{}
+		player := entities.Player{}
 		player.Controller = controllers.FPSCameraController{
 			Speed:            10.0,
 			MouseSensitivity: 1.0,
