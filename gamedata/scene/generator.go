@@ -1,6 +1,7 @@
 package scene
 
 import (
+	"gabriellv/game/algorithms"
 	"gabriellv/game/structs"
 	"math/rand"
 
@@ -21,29 +22,25 @@ func NewLevelGenerator() LevelGenerator {
 }
 
 func (level *LevelGenerator) Generate() {
-	// first, create 3D grid to represent world
+	// first, create a grid to represent world
 
-	roomGraph := structs.Graph[RoomNode]{}
+	roomGraph := structs.Graph[mgl32.Vec2]{}
 	roomGraph.New()
 
 	for i := 0; i < level.RoomCount; i++ {
 
 		x := rand.Float32()
 		y := rand.Float32()
-		z := rand.Float32()
 
-		width := rand.Float32()
-		height := rand.Float32()
+		point := mgl32.Vec2{x, y}
 
-		room := RoomNode{
-			Position:   mgl32.Vec3{x, y, z},
-			Dimensions: mgl32.Vec3{width, 1, height},
-		}
-
-		roomGraph.AddNode(room)
+		roomGraph.AddNode(point)
 	}
 
 	// link every node
+
+	algorithms.DelauneyTriangulation(&roomGraph)
+
 	// remove excess edges
 	// build room meesh
 }
