@@ -4,5 +4,4 @@ package scene
 // that represent it
 
 type Map struct {
-
 }

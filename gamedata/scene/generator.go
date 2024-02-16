@@ -12,7 +12,7 @@ type LevelGenerator struct {
 }
 
 type RoomNode struct {
-	Position mgl32.Vec3
+	Position   mgl32.Vec3
 	Dimensions mgl32.Vec3
 }
 
@@ -20,9 +20,9 @@ func NewLevelGenerator() LevelGenerator {
 	return LevelGenerator{}
 }
 
-func  (level *LevelGenerator) Generate() {
+func (level *LevelGenerator) Generate() {
 	// first, create 3D grid to represent world
-	
+
 	roomGraph := structs.Graph[RoomNode]{}
 	roomGraph.New()
 
@@ -36,7 +36,7 @@ func  (level *LevelGenerator) Generate() {
 		height := rand.Float32()
 
 		room := RoomNode{
-			Position: mgl32.Vec3{x, y, z},
+			Position:   mgl32.Vec3{x, y, z},
 			Dimensions: mgl32.Vec3{width, 1, height},
 		}
 
@@ -49,12 +49,12 @@ func  (level *LevelGenerator) Generate() {
 }
 
 type Grid3D[T any] struct {
-	Data []T
-	Dimensions struct { X, Y, Z int }
+	Data       []T
+	Dimensions struct{ X, Y, Z int }
 }
 
 func (grid *Grid3D[T]) New(x, y, z int) {
-	grid.Data = make([]T, x * y * z)
+	grid.Data = make([]T, x*y*z)
 	grid.Dimensions.X = x
 	grid.Dimensions.Y = y
 	grid.Dimensions.Z = z
@@ -62,7 +62,7 @@ func (grid *Grid3D[T]) New(x, y, z int) {
 
 func (grid *Grid3D[T]) Index(x, y, z int) int {
 	xy := grid.Dimensions.X * grid.Dimensions.Y
-	index := (x  % grid.Dimensions.X) + ((y * grid.Dimensions.X) % grid.Dimensions.Y) + ((z * xy) % grid.Dimensions.Z)
+	index := (x % grid.Dimensions.X) + ((y * grid.Dimensions.X) % grid.Dimensions.Y) + ((z * xy) % grid.Dimensions.Z)
 
 	return index
 }

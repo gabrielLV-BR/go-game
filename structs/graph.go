@@ -12,4 +12,3 @@ func (graph *Graph[T]) New() {
 func (graph *Graph[T]) AddNode(node T) {
 	graph.Nodes = append(graph.Nodes, node)
 }
-
