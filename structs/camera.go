@@ -23,18 +23,10 @@ type Camera struct {
 	projectionMatrix mgl32.Mat4
 }
 
-func NewCamera() Camera {
-	camera := Camera{
-		position: mgl32.Vec3{},
-		yaw:      0.0,
-		pitch:    0.0,
-		// try to save a little bit on unnecessary calculations
-		dirty:            true,
-		projectionMatrix: mgl32.Ident4(),
-		viewMatrix:       mgl32.Ident4(),
-	}
-
-	return camera
+func (camera *Camera) New() {
+	camera.dirty = true
+	camera.projectionMatrix = mgl32.Ident4()
+	camera.viewMatrix = mgl32.Ident4()
 }
 
 func (camera *Camera) GetProjectionMatrix() mgl32.Mat4 {

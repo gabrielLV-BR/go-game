@@ -12,3 +12,12 @@ func (graph *Graph[T]) New() {
 func (graph *Graph[T]) AddNode(node T) {
 	graph.Nodes = append(graph.Nodes, node)
 }
+
+func (graph *Graph[T]) AddEdge(a, b int) {
+	graph.Edges[a] = append(graph.Edges[a], b)
+	graph.Edges[b] = append(graph.Edges[b], a)
+}
+
+func (graph *Graph[T]) AddDirectedEdge(a, b int) {
+	graph.Edges[a] = append(graph.Edges[a], b)
+}

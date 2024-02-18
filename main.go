@@ -64,7 +64,8 @@ func main() {
 	}
 
 	gameState := gamedata.State{}
-	*gameState.Camera = structs.NewCamera()
+	gameState.Camera = &structs.Camera{}
+	gameState.Camera.New()
 	gameState.Camera.UsePerspectiveProjection(80.0, window.AspectRatio(), 0.1, 1000.0)
 	gameState.Camera.SetPosition(mgl32.Vec3{0.0, 0.0, -1.0})
 
@@ -96,8 +97,12 @@ func main() {
 			Velocity: 10.0,
 		}
 
-		mesh := core.NewMesh(obj.Vertices, obj.Indices)
-		mesh.SetAttributes(
+		mesh := core.Mesh{
+			Vertices: obj.Vertices,
+			Indices:  obj.Indices,
+		}
+
+		meshHandle := mesh.Bind(
 			core.MeshAttributes.Position(),
 			core.MeshAttributes.Normal(),
 			core.MeshAttributes.UV(),
@@ -111,9 +116,9 @@ func main() {
 		transform := structs.NewTransform()
 
 		model := core.Model{
-			Mesh:      mesh,
-			Material:  &material,
-			Transform: transform,
+			MeshHandle: meshHandle,
+			Material:   &material,
+			Transform:  transform,
 		}
 
 		ent.ModelId = gameState.Scene.AddModel(model)
@@ -137,7 +142,7 @@ func main() {
 		pass := renderer.BeginDraw(gameState.Camera)
 
 		for _, model := range gameState.Scene.Models {
-			pass.DrawMesh(model.Mesh, model.Transform, model.Material)
+			pass.DrawMesh(model.MeshHandle, model.Transform, model.Material)
 		}
 
 		pass.EndDraw()

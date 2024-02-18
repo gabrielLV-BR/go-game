@@ -5,7 +5,7 @@ import (
 )
 
 type Model struct {
-	Mesh      Mesh
-	Material  Material
-	Transform structs.Transform
+	MeshHandle MeshHandle
+	Material   Material
+	Transform  structs.Transform
 }

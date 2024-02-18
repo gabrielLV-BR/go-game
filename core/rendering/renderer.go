@@ -113,7 +113,7 @@ func (renderer *Renderer) Clear() {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
 
-func (pass *RenderPass) DrawMesh(mesh core.Mesh, transform structs.Transform, material core.Material) {
+func (pass *RenderPass) DrawMesh(meshHandle core.MeshHandle, transform structs.Transform, material core.Material) {
 	model := transform.ModelMatrix()
 
 	// get program from material
@@ -123,20 +123,21 @@ func (pass *RenderPass) DrawMesh(mesh core.Mesh, transform structs.Transform, ma
 
 	material.Prepare(shader)
 
-	mesh.Bind()
+	meshHandle.Bind()
 
 	gl.DrawElements(
 		gl.TRIANGLES,
-		int32(mesh.IndexCount()),
+		meshHandle.IndexCount,
 		gl.UNSIGNED_INT,
 		nil,
 	)
 
+	//MAYBE remove these calls? pretty sure they're unnecessary
 	shader.Unbind()
-	mesh.Unbind()
+	meshHandle.Unbind()
 }
 
-func (pass *RenderPass) DrawMeshInstanced(mesh core.Mesh, material core.Material, transforms []mgl32.Mat4) {
+func (pass *RenderPass) DrawMeshInstanced(meshHandle core.MeshHandle, material core.Material, transforms []mgl32.Mat4) {
 	sizeOfMat4 := reflect.TypeOf(mgl32.Mat4{}).Size()
 	sizeOfVec4 := reflect.TypeOf(mgl32.Vec4{}).Size()
 
@@ -146,7 +147,7 @@ func (pass *RenderPass) DrawMeshInstanced(mesh core.Mesh, material core.Material
 	gl.BindBuffer(gl.ARRAY_BUFFER, buffer)
 	gl.BufferData(gl.ARRAY_BUFFER, len(transforms)*int(sizeOfMat4), gl.Ptr(transforms), gl.STATIC_DRAW)
 
-	mesh.Bind()
+	meshHandle.Bind()
 
 	// set up data for instance array
 	for j := 0; j < 4; j++ {
@@ -167,12 +168,12 @@ func (pass *RenderPass) DrawMeshInstanced(mesh core.Mesh, material core.Material
 
 	gl.DrawElementsInstanced(
 		gl.TRIANGLES,
-		int32(mesh.IndexCount()),
+		meshHandle.IndexCount,
 		gl.UNSIGNED_INT,
 		nil,
 		int32(len(transforms)),
 	)
 
 	shader.Unbind()
-	mesh.Unbind()
+	meshHandle.Unbind()
 }

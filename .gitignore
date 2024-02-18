@@ -21,8 +21,8 @@
 game
 
 # Testing assets
-assets/textures/
-assets/models/
+assets/textures/*
+assets/models/*
 
 # Go workspace file
 go.work

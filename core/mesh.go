@@ -6,10 +6,14 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
+type MeshHandle struct {
+	VAO        uint32
+	IndexCount int32
+}
+
 type Mesh struct {
-	vao      uint32
-	vertices []float32
-	indices  []uint32
+	Vertices []float32
+	Indices  []uint32
 }
 
 type MeshAttribute struct {
@@ -18,13 +22,13 @@ type MeshAttribute struct {
 	xtype uint32
 }
 
-func NewMesh(vertices []float32, indices []uint32) Mesh {
+func (mesh *Mesh) Bind(attributes ...MeshAttribute) MeshHandle {
 	var vao uint32
 	var vbo uint32
 	var ebo uint32
 
-	vertices_size := len(vertices) * int(reflect.TypeOf(vertices).Elem().Size())
-	indices_size := len(indices) * int(reflect.TypeOf(indices).Elem().Size())
+	vertices_size := len(mesh.Vertices) * int(reflect.TypeOf(mesh.Vertices).Elem().Size())
+	indices_size := len(mesh.Indices) * int(reflect.TypeOf(mesh.Indices).Elem().Size())
 
 	// vao
 	gl.GenVertexArrays(1, &vao)
@@ -32,24 +36,31 @@ func NewMesh(vertices []float32, indices []uint32) Mesh {
 
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, vertices_size, gl.Ptr(vertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, vertices_size, gl.Ptr(mesh.Vertices), gl.STATIC_DRAW)
 
 	gl.GenBuffers(1, &ebo)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, indices_size, gl.Ptr(indices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, indices_size, gl.Ptr(mesh.Indices), gl.STATIC_DRAW)
+
+	setAttributes(attributes...)
 
 	gl.BindVertexArray(0)
 
-	return Mesh{
-		vao:      vao,
-		vertices: vertices,
-		indices:  indices,
+	return MeshHandle{
+		VAO:        vao,
+		IndexCount: int32(len(mesh.Indices)),
 	}
 }
 
-func (mesh *Mesh) SetAttributes(attributes ...MeshAttribute) {
-	mesh.Bind()
+func (handle MeshHandle) Bind() {
+	gl.BindVertexArray(uint32(handle.VAO))
+}
 
+func (handle MeshHandle) Unbind() {
+	gl.BindVertexArray(0)
+}
+
+func setAttributes(attributes ...MeshAttribute) {
 	var stride int32
 
 	for _, attrib := range attributes {
@@ -69,22 +80,6 @@ func (mesh *Mesh) SetAttributes(attributes ...MeshAttribute) {
 		gl.EnableVertexAttribArray(uint32(i))
 		offset += (uint32)(attribute.Stride())
 	}
-
-	mesh.Unbind()
-}
-
-func (mesh *Mesh) IndexCount() int {
-	return len(mesh.indices)
-}
-
-//
-
-func (mesh Mesh) Bind() {
-	gl.BindVertexArray(mesh.vao)
-}
-
-func (mesh Mesh) Unbind() {
-	gl.BindVertexArray(0)
 }
 
 //

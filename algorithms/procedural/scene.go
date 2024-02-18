@@ -1,7 +1,6 @@
-package scene
+package procedural
 
 import (
-	"gabriellv/game/algorithms"
 	"gabriellv/game/structs"
 	"math/rand"
 
@@ -38,11 +37,31 @@ func (level *LevelGenerator) Generate() {
 	}
 
 	// link every node
+	// very dumb and slow but will do the trick
 
-	algorithms.DelauneyTriangulation(&roomGraph)
+	for i1, node1 := range roomGraph.Nodes {
 
-	// remove excess edges
+		var closestDistance float32
+		var closestNode int
+
+		for i2, node2 := range roomGraph.Nodes {
+			if i1 == i2 {
+				continue
+			}
+
+			dist := node1.Sub(node2).Len()
+
+			if closestDistance > dist {
+				closestDistance = dist
+				closestNode = i2
+			}
+		}
+
+		roomGraph.AddDirectedEdge(i1, closestNode)
+	}
+
 	// build room meesh
+
 }
 
 type Grid3D[T any] struct {
