@@ -55,6 +55,10 @@ func (builder *MeshBuilder) AddBox(position, size mgl32.Vec3) {
 	builder.Meshes = append(builder.Meshes, mesh)
 }
 
+func (builder *MeshBuilder) AddTriangle(a, b, c mgl32.Vec3) {
+	//TODO add triangle to mesh builder
+}
+
 func (builder *MeshBuilder) Build() core.Mesh {
 	return core.Mesh{}
 }

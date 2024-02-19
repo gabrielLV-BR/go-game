@@ -3,35 +3,48 @@ package procedural
 import (
 	"gabriellv/game/structs"
 	"math/rand"
+	"sort"
 
 	"github.com/go-gl/mathgl/mgl32"
 )
 
+const MAX_ROOM_WIDTH int = 10
+const MAX_ROOM_HEIGHT int = 3
+const MAX_ROOM_DEPTH int = 10
+
 type LevelGenerator struct {
 	RoomCount int
-}
-
-type RoomNode struct {
-	Position   mgl32.Vec3
-	Dimensions mgl32.Vec3
 }
 
 func NewLevelGenerator() LevelGenerator {
 	return LevelGenerator{}
 }
 
+type cube struct {
+	Position mgl32.Vec3
+	Width    int
+	Depth    int
+}
+
 func (level *LevelGenerator) Generate() {
 	// first, create a grid to represent world
 
-	roomGraph := structs.Graph[mgl32.Vec2]{}
+	roomGraph := structs.Graph[cube]{}
 	roomGraph.New()
 
 	for i := 0; i < level.RoomCount; i++ {
-
 		x := rand.Float32()
 		y := rand.Float32()
+		z := float32(0.0)
 
-		point := mgl32.Vec2{x, y}
+		w := rand.Intn(MAX_ROOM_WIDTH)
+		d := rand.Intn(MAX_ROOM_DEPTH)
+
+		point := cube{
+			Position: mgl32.Vec3{x, y, z},
+			Width:    w,
+			Depth:    d,
+		}
 
 		roomGraph.AddNode(point)
 	}
@@ -49,7 +62,7 @@ func (level *LevelGenerator) Generate() {
 				continue
 			}
 
-			dist := node1.Sub(node2).Len()
+			dist := node1.Position.Sub(node2.Position).Len()
 
 			if closestDistance > dist {
 				closestDistance = dist
@@ -60,33 +73,84 @@ func (level *LevelGenerator) Generate() {
 		roomGraph.AddDirectedEdge(i1, closestNode)
 	}
 
+	// cube-ify world
+	grid := structs.Grid3D[bool]{}
+	grid.New(50, 10, 50)
+
+	// I'm gonna use the marching cubes algorithm to make the map
+	// first, we place the rooms in the grid
+	placeRoomsInGrid(&grid, &roomGraph)
+	placeEdgesInGrid(&grid, &roomGraph)
+
 	// build room meesh
 
+	MarchingCubes(
+		grid,
+		mgl32.Vec3{
+			float32(MAX_ROOM_WIDTH),
+			float32(MAX_ROOM_HEIGHT),
+			float32(MAX_ROOM_DEPTH),
+		},
+	)
 }
 
-type Grid3D[T any] struct {
-	Data       []T
-	Dimensions struct{ X, Y, Z int }
+func placeRoomsInGrid(grid *structs.Grid3D[bool], roomGraph *structs.Graph[cube]) {
+	for _, node := range roomGraph.Nodes {
+		x := int(node.Position.X())
+		y := int(node.Position.Y())
+		z := int(node.Position.Z())
+
+		for xx := 0; xx < (x + node.Width); xx++ {
+			for zz := 0; zz < (z + node.Depth); zz++ {
+				for yy := 0; yy < (y + MAX_ROOM_HEIGHT); yy++ {
+					grid.Place(true, xx, yy, zz)
+				}
+			}
+		}
+	}
 }
 
-func (grid *Grid3D[T]) New(x, y, z int) {
-	grid.Data = make([]T, x*y*z)
-	grid.Dimensions.X = x
-	grid.Dimensions.Y = y
-	grid.Dimensions.Z = z
-}
+type tuple [2]int
 
-func (grid *Grid3D[T]) Index(x, y, z int) int {
-	xy := grid.Dimensions.X * grid.Dimensions.Y
-	index := (x % grid.Dimensions.X) + ((y * grid.Dimensions.X) % grid.Dimensions.Y) + ((z * xy) % grid.Dimensions.Z)
+func placeEdgesInGrid(grid *structs.Grid3D[bool], roomGraph *structs.Graph[cube]) {
+	set := make(map[tuple]bool)
 
-	return index
-}
+	for k, v := range roomGraph.Edges {
+		fromIndex := k
 
-func (grid *Grid3D[T]) Place(val T, x, y, z int) {
-	grid.Data[grid.Index(x, y, z)] = val
-}
+		for _, toIndex := range v {
+			if fromIndex == toIndex {
+				continue
+			}
 
-func (grid *Grid3D[T]) At(x, y, z int) T {
-	return grid.Data[grid.Index(x, y, z)]
+			directionTuple := [2]int{fromIndex, toIndex}
+
+			// check to see if we've already connected these nodes
+			// we gotta do this because our room edging algorithm
+			// places double edges for A -> B and B -> A
+			sort.Ints(directionTuple[:])
+			if _, ok := set[directionTuple]; ok {
+				continue
+			}
+
+			a := roomGraph.Nodes[fromIndex]
+			b := roomGraph.Nodes[toIndex]
+
+			direction := a.Position.Sub(b.Position)
+			nDirection := direction.Normalize()
+
+			for direction.Len() > 0 {
+				x := int(direction.X())
+				y := int(direction.Y())
+
+				for z := 0; z < MAX_ROOM_HEIGHT; z++ {
+					grid.Place(true, x, y, z)
+				}
+
+				direction = direction.Sub(nDirection)
+			}
+
+			set[directionTuple] = true
+		}
+	}
 }
