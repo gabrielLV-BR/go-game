@@ -1,6 +1,7 @@
 package procedural
 
 import (
+	"gabriellv/game/core"
 	"gabriellv/game/structs"
 	"math/rand"
 	"sort"
@@ -9,15 +10,11 @@ import (
 )
 
 const MAX_ROOM_WIDTH int = 10
-const MAX_ROOM_HEIGHT int = 3
+const MAX_ROOM_HEIGHT int = 2
 const MAX_ROOM_DEPTH int = 10
 
 type LevelGenerator struct {
 	RoomCount int
-}
-
-func NewLevelGenerator() LevelGenerator {
-	return LevelGenerator{}
 }
 
 type cube struct {
@@ -26,7 +23,7 @@ type cube struct {
 	Depth    int
 }
 
-func (level *LevelGenerator) Generate() {
+func (level *LevelGenerator) Generate() core.Mesh {
 	// first, create a grid to represent world
 
 	roomGraph := structs.Graph[cube]{}
@@ -80,11 +77,11 @@ func (level *LevelGenerator) Generate() {
 	// I'm gonna use the marching cubes algorithm to make the map
 	// first, we place the rooms in the grid
 	placeRoomsInGrid(&grid, &roomGraph)
-	placeEdgesInGrid(&grid, &roomGraph)
+	// placeEdgesInGrid(&grid, &roomGraph)
 
 	// build room meesh
 
-	MarchingCubes(
+	return MarchingCubes(
 		grid,
 		mgl32.Vec3{
 			float32(MAX_ROOM_WIDTH),

@@ -1,6 +1,7 @@
 package procedural
 
 import (
+	"gabriellv/game/core"
 	"gabriellv/game/structs"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -48,7 +49,7 @@ func vec3ElementMult(a, b mgl32.Vec3) mgl32.Vec3 {
 
 // TODO test, cleanup and refactor into multiple functions
 // (will have to convert into using grid of floats first)
-func MarchingCubes[T Weightable](grid structs.Grid3D[T], dimensions mgl32.Vec3) {
+func MarchingCubes[T Weightable](grid structs.Grid3D[T], dimensions mgl32.Vec3) core.Mesh {
 	meshBuilder := MeshBuilder{}
 
 	for x := 0; x < grid.Dimensions.X-1; x++ {
@@ -108,14 +109,18 @@ func MarchingCubes[T Weightable](grid structs.Grid3D[T], dimensions mgl32.Vec3) 
 					uniqueTris[v1] = true
 				}
 
-				meshBuilder.AddTriangle(
-					trianglePoints[0],
-					trianglePoints[1],
-					trianglePoints[2],
-				)
+				if state > 0 && state < 255 {
+					meshBuilder.AddTriangle(
+						trianglePoints[0],
+						trianglePoints[1],
+						trianglePoints[2],
+					)
+				}
 			}
 		}
 	}
+
+	return meshBuilder.Build(false)
 }
 
 // Marching Cubes triangulation table
