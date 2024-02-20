@@ -94,7 +94,7 @@ func main() {
 
 	{ // Spining object entity
 		ent := entities.SpinningEntity{
-			Velocity: 10.0,
+			Velocity: 1.0,
 		}
 
 		mesh := core.Mesh{
