@@ -71,7 +71,7 @@ func (level *LevelGenerator) Generate() core.Mesh {
 	}
 
 	// cube-ify world
-	grid := structs.Grid3D[bool]{}
+	grid := structs.Grid3D[float32]{}
 	grid.New(50, 10, 50)
 
 	// I'm gonna use the marching cubes algorithm to make the map
@@ -91,7 +91,7 @@ func (level *LevelGenerator) Generate() core.Mesh {
 	)
 }
 
-func placeRoomsInGrid(grid *structs.Grid3D[bool], roomGraph *structs.Graph[cube]) {
+func placeRoomsInGrid(grid *structs.Grid3D[float32], roomGraph *structs.Graph[cube]) {
 	for _, node := range roomGraph.Nodes {
 		x := int(node.Position.X())
 		y := int(node.Position.Y())
@@ -100,7 +100,7 @@ func placeRoomsInGrid(grid *structs.Grid3D[bool], roomGraph *structs.Graph[cube]
 		for xx := 0; xx < (x + node.Width); xx++ {
 			for zz := 0; zz < (z + node.Depth); zz++ {
 				for yy := 0; yy < (y + MAX_ROOM_HEIGHT); yy++ {
-					grid.Place(true, xx, yy, zz)
+					grid.Place(1.0, xx, yy, zz)
 				}
 			}
 		}
@@ -109,8 +109,8 @@ func placeRoomsInGrid(grid *structs.Grid3D[bool], roomGraph *structs.Graph[cube]
 
 type tuple [2]int
 
-func placeEdgesInGrid(grid *structs.Grid3D[bool], roomGraph *structs.Graph[cube]) {
-	set := make(map[tuple]bool)
+func placeEdgesInGrid(grid *structs.Grid3D[float32], roomGraph *structs.Graph[cube]) {
+	set := make(map[tuple]float32)
 
 	for k, v := range roomGraph.Edges {
 		fromIndex := k
@@ -141,13 +141,13 @@ func placeEdgesInGrid(grid *structs.Grid3D[bool], roomGraph *structs.Graph[cube]
 				y := int(direction.Y())
 
 				for z := 0; z < MAX_ROOM_HEIGHT; z++ {
-					grid.Place(true, x, y, z)
+					grid.Place(1.0, x, y, z)
 				}
 
 				direction = direction.Sub(nDirection)
 			}
 
-			set[directionTuple] = true
+			set[directionTuple] = 1.0
 		}
 	}
 }

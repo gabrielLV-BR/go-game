@@ -27,8 +27,15 @@ func (mesh *Mesh) Bind(attributes ...MeshAttribute) MeshHandle {
 	var vbo uint32
 	var ebo uint32
 
-	vertices_size := len(mesh.Vertices) * int(reflect.TypeOf(mesh.Vertices).Elem().Size())
-	indices_size := len(mesh.Indices) * int(reflect.TypeOf(mesh.Indices).Elem().Size())
+	vertices_size := len(mesh.Vertices)
+	indices_size := len(mesh.Indices)
+
+	if vertices_size == 0 {
+		return MeshHandle{}
+	}
+
+	vertices_size *= int(reflect.TypeOf(mesh.Vertices).Elem().Size())
+	indices_size *= int(reflect.TypeOf(mesh.Indices).Elem().Size())
 
 	// vao
 	gl.GenVertexArrays(1, &vao)

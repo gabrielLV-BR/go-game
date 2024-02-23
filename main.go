@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gabriellv/game/algorithms/procedural"
 	"gabriellv/game/controllers"
 	"gabriellv/game/core"
 	"gabriellv/game/core/materials"
@@ -111,6 +112,34 @@ func main() {
 		material := materials.TextureMaterial{
 			Color:   structs.Colors.White(),
 			Texture: diffuse,
+		}
+
+		transform := structs.NewTransform()
+
+		model := core.Model{
+			MeshHandle: meshHandle,
+			Material:   &material,
+			Transform:  transform,
+		}
+
+		ent.ModelId = gameState.Scene.AddModel(model)
+		gameState.Scene.AddEntity(&ent)
+	}
+
+	{ // 3D map to test marching cubes
+
+		ent := entities.SpinningEntity{}
+
+		grid := structs.Grid3D[float32]{}
+		grid.New(10, 10, 10)
+
+		grid.Place(1.0, 5, 5, 5)
+
+		mesh := procedural.MarchingCubes(grid, mgl32.Vec3{1, 1, 1})
+		meshHandle := mesh.Bind(core.MeshAttributes.Position())
+
+		material := materials.ColorMaterial{
+			Color: structs.RGB(1.0, 0.0, 0.0),
 		}
 
 		transform := structs.NewTransform()

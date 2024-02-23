@@ -7,12 +7,12 @@ type Color struct {
 	A float32
 }
 
-func NewColor(r, g, b, a float32) Color {
+func RGB(r, g, b float32) Color {
 	return Color{
 		R: r,
 		G: g,
 		B: b,
-		A: a,
+		A: 1.0,
 	}
 }
 
@@ -23,9 +23,9 @@ func (c Color) Unpack() (float32, float32, float32, float32) {
 var Colors Color
 
 func (c Color) White() Color {
-	return NewColor(1.0, 1.0, 1.0, 1.0)
+	return RGB(1.0, 1.0, 1.0)
 }
 
 func (c Color) Black() Color {
-	return NewColor(0.0, 0.0, 0.0, 1.0)
+	return RGB(0.0, 0.0, 0.0)
 }
