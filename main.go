@@ -134,7 +134,6 @@ func main() {
 		grid.New(5, 5, 5)
 
 		grid.Place(1.0, 4, 0, 0)
-		grid.Place(1.0, 1, 0, 0)
 
 		meshBuilder := procedural.MarchingCubes(grid, mgl32.Vec3{1, 1, 1})
 		meshBuilder.IncludeId = true

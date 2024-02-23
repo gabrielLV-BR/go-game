@@ -9,22 +9,25 @@ import (
 func MarchingCubes(grid structs.Grid3D[float32], dimensions mgl32.Vec3) MeshBuilder {
 	meshBuilder := MeshBuilder{}
 
+	baseSize := mgl32.Vec3{
+		dimensions[0] / float32(grid.Dimensions.X),
+		dimensions[1] / float32(grid.Dimensions.Y),
+		dimensions[2] / float32(grid.Dimensions.Z),
+	}
+
 	for x := 0; x < grid.Dimensions.X; x++ {
 		for y := 0; y < grid.Dimensions.Y; y++ {
 			for z := 0; z < grid.Dimensions.Z; z++ {
+				cubeSize := baseSize
 
-				cubeSize := mgl32.Vec3{
-					dimensions[0] * float32(x) / float32(grid.Dimensions.X),
-					dimensions[1] * float32(y) / float32(grid.Dimensions.Y),
-					dimensions[2] * float32(z) / float32(grid.Dimensions.Z),
-				}
-
-				vectorOffset := mgl32.Vec3{
-					float32(x) * cubeSize[0],
-					float32(y) * cubeSize[1],
-					float32(z) * cubeSize[2],
-				}
-
+				vectorOffset := vecMult(
+					mgl32.Vec3{
+						float32(x),
+						float32(y),
+						float32(z),
+					}, 
+					cubeSize,
+				)
 				// we start at the 0-eth vertex
 				// as specified by the vertex and edge layout
 
@@ -81,7 +84,10 @@ func insertVertices(builder *MeshBuilder, triangle []int, cubeSize, vectorOffset
 		v1 := vertexFor(edge[0])
 		v2 := vertexFor(edge[1])
 
-		v := vecMult(v1.Add(v2).Mul(0.5), cubeSize).Add(vectorOffset)
+		// get middle of edge
+		v := v1.Add(v2).Mul(0.5)
+		// scale and position
+		v = vecMult(v, cubeSize).Add(vectorOffset)
 
 		triangleList[inserter] = v
 		inserter += 1
