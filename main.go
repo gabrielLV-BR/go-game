@@ -131,12 +131,17 @@ func main() {
 		ent := entities.SpinningEntity{}
 
 		grid := structs.Grid3D[float32]{}
-		grid.New(10, 10, 10)
+		grid.New(5, 5, 5)
 
-		grid.Place(1.0, 5, 5, 5)
+		grid.Place(1.0, 4, 0, 0)
+		grid.Place(1.0, 1, 0, 0)
 
-		mesh := procedural.MarchingCubes(grid, mgl32.Vec3{1, 1, 1})
-		meshHandle := mesh.Bind(core.MeshAttributes.Position())
+		meshBuilder := procedural.MarchingCubes(grid, mgl32.Vec3{1, 1, 1})
+		meshBuilder.IncludeId = true
+
+		mesh := meshBuilder.Build(false)
+
+		meshHandle := mesh.Bind(core.MeshAttributes.Position(), core.MeshAttributes.Float())
 
 		material := materials.ColorMaterial{
 			Color: structs.RGB(1.0, 0.0, 0.0),

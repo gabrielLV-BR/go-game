@@ -113,6 +113,14 @@ func (m MeshAttribute) UV() MeshAttribute {
 	}
 }
 
+func (m MeshAttribute) Float() MeshAttribute {
+	return MeshAttribute{
+		count: 1,
+		xsize: 4,
+		xtype: gl.FLOAT,
+	}
+}
+
 func (m MeshAttribute) Stride() int32 {
 	return m.count * m.xsize
 }

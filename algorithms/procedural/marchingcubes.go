@@ -1,98 +1,111 @@
 package procedural
 
 import (
-	"gabriellv/game/core"
 	"gabriellv/game/structs"
 
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-var cases [8]mgl32.Vec3 = [8]mgl32.Vec3{
-	// front
-	{0, 0, 0}, // 0
-	{1, 0, 0}, // 1
-	{0, 1, 0}, // 2
-	{1, 1, 0}, // 3
-	// back
-	{0, 0, 1}, // 4
-	{1, 0, 1}, // 5
-	{0, 1, 1}, // 6
-	{1, 1, 1}, // 7
-}
-
-// TODO test, cleanup and refactor into multiple functions
-// (will have to convert into using grid of floats first)
-func MarchingCubes(grid structs.Grid3D[float32], dimensions mgl32.Vec3) core.Mesh {
+func MarchingCubes(grid structs.Grid3D[float32], dimensions mgl32.Vec3) MeshBuilder {
 	meshBuilder := MeshBuilder{}
 
 	for x := 0; x < grid.Dimensions.X; x++ {
 		for y := 0; y < grid.Dimensions.Y; y++ {
 			for z := 0; z < grid.Dimensions.Z; z++ {
 
-				vectorOffset := mgl32.Vec3{
-					float32(x) * dimensions.X(),
-					float32(y) * dimensions.Y(),
-					float32(z) * dimensions.Z(),
+				cubeSize := mgl32.Vec3{
+					dimensions[0] * float32(x) / float32(grid.Dimensions.X),
+					dimensions[1] * float32(y) / float32(grid.Dimensions.Y),
+					dimensions[2] * float32(z) / float32(grid.Dimensions.Z),
 				}
 
-				// let's assume we start at the 0-eth vertex
+				vectorOffset := mgl32.Vec3{
+					float32(x) * cubeSize[0],
+					float32(y) * cubeSize[1],
+					float32(z) * cubeSize[2],
+				}
+
+				// we start at the 0-eth vertex
 				// as specified by the vertex and edge layout
 
-				state := uint8(0)
-				for index, c := range cases {
-					//MAYBE kinda cringe i'm having to cast so many times, maybe there's
-					// a better way?
-					val := grid.At(x+int(c[0]), y+int(c[1]), z+int(c[2]))
+				state := calcState(grid, x, y, z)
 
-					if val > 0.5 {
-						state |= 1 << index
-					}
+				// either completely empty or completely filled, no triangle whatsoever
+
+				if state == 0 || state == 255 {
+					continue
 				}
 
 				// state represents which configuration we have
 				// now, we should just index it into the triangulation table
 				// to figure out the tri to build
 
-				if state == 0 || state == 255 {
-					continue
-				}
-
 				config := triangleTable[state]
 
-				triangleList := [3]mgl32.Vec3{}
-				inserter := 0
+				insertVertices(&meshBuilder, config, cubeSize, vectorOffset)
 
-				for _, triangle := range config {
-					edge := edgeVertexIndices[triangle]
-
-					v := cases[edge[0]].
-						Add(cases[edge[1]]).
-						Mul(0.5).
-						Add(vectorOffset)
-
-					triangleList[inserter] = v
-					inserter += 1
-
-					if inserter == 3 {
-						v1 := triangleList[0]
-						v2 := triangleList[1]
-						v3 := triangleList[2]
-
-						meshBuilder.AddTriangle(v1, v2, v3)
-
-						inserter = 0
-					}
-				}
 			}
 		}
 	}
 
-	return meshBuilder.Build(false)
+	return meshBuilder
 }
 
-// Marching Cubes triangulation table
-// Taken from dwilliamson/MarchingCubes.js
-// Translation to Go by myself
+func calcState(grid structs.Grid3D[float32], x, y, z int) uint8 {
+	state := uint8(0)
+
+	for dx := 0; dx <= 2; dx++ {
+		for dy := 0; dy <= 2; dy++ {
+			for dz := 0; dz <= 2; dz++ {
+				val := grid.At(x+dx, y+dy, z+dz)
+
+				if val > 0.5 {
+					state |= 1
+				}
+
+				state <<= 1
+			}
+		}
+	}
+
+	return state
+}
+
+func insertVertices(builder *MeshBuilder, triangle []int, cubeSize, vectorOffset mgl32.Vec3) {
+	triangleList := [3]mgl32.Vec3{}
+	inserter := 0
+
+	for _, edgeIndex := range triangle {
+		edge := edgeVertexIndices[edgeIndex]
+
+		v1 := vertexFor(edge[0])
+		v2 := vertexFor(edge[1])
+
+		v := vecMult(v1.Add(v2).Mul(0.5), cubeSize).Add(vectorOffset)
+
+		triangleList[inserter] = v
+		inserter += 1
+
+		if inserter == 3 {
+			v1 := triangleList[0]
+			v2 := triangleList[1]
+			v3 := triangleList[2]
+
+			builder.AddTriangle(v1, v2, v3)
+
+			inserter = 0
+		}
+	}
+
+}
+
+func vecMult(a, b mgl32.Vec3) mgl32.Vec3 {
+	return mgl32.Vec3{
+		a[0] * b[0],
+		a[1] * b[1],
+		a[2] * b[2],
+	}
+}
 
 //    i = cube index [0, 7]
 //    x = (i & 1) >> 0
@@ -106,6 +119,19 @@ func MarchingCubes(grid structs.Grid3D[float32], dimensions mgl32.Vec3) core.Mes
 //      |   /
 //      | /
 //      +----- x
+
+func vertexFor(index int) mgl32.Vec3 {
+	return mgl32.Vec3{
+		float32((index & 1) >> 0),
+		float32((index & 2) >> 1),
+		float32((index & 4) >> 2),
+	}
+}
+
+// Marching Cubes triangulation table
+// Taken from dwilliamson/MarchingCubes.js
+// Translation to Go by myself
+
 //
 // Vertex and edge layout:
 //

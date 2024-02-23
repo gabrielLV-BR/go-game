@@ -7,7 +7,8 @@ import (
 )
 
 type MeshBuilder struct {
-	Meshes []core.Mesh
+	Meshes    []core.Mesh
+	IncludeId bool
 }
 
 func (builder *MeshBuilder) New() {
@@ -125,9 +126,13 @@ func (builder *MeshBuilder) Build(removeDuplicates bool) core.Mesh {
 		}
 	} else {
 		indexOffset := 0
-		for _, mesh := range builder.Meshes {
-			for _, v := range mesh.Vertices {
+		for meshIndex, mesh := range builder.Meshes {
+			for i, v := range mesh.Vertices {
 				vertices = append(vertices, v)
+
+				if builder.IncludeId && (i+1)%3 == 0 {
+					vertices = append(vertices, float32(meshIndex)/float32(len(mesh.Vertices)))
+				}
 			}
 
 			for _, i := range mesh.Indices {

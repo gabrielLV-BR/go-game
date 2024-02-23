@@ -1,7 +1,6 @@
 package procedural
 
 import (
-	"gabriellv/game/core"
 	"gabriellv/game/structs"
 	"math/rand"
 	"sort"
@@ -23,7 +22,7 @@ type cube struct {
 	Depth    int
 }
 
-func (level *LevelGenerator) Generate() core.Mesh {
+func (level *LevelGenerator) Generate() MeshBuilder {
 	// first, create a grid to represent world
 
 	roomGraph := structs.Graph[cube]{}
