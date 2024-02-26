@@ -10,3 +10,7 @@ type Circumference struct {
 func (c Circumference) Contains(point mgl32.Vec2) bool {
 	return (point.Sub(c.Center).Len()) < c.Radius
 }
+
+type Triangle struct {
+	A, B, C mgl32.Vec3
+}

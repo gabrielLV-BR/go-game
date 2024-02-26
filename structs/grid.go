@@ -13,9 +13,7 @@ func (grid *Grid3D[T]) New(x, y, z int) {
 }
 
 func (grid *Grid3D[T]) Index(x, y, z int) int {
-	xy := grid.Dimensions.X * grid.Dimensions.Y
-	index := (x % grid.Dimensions.X) + ((y * grid.Dimensions.X) % grid.Dimensions.Y) + ((z * xy) % grid.Dimensions.Z)
-
+	index := x + y*grid.Dimensions.Y + z*grid.Dimensions.Y*grid.Dimensions.Z
 	return index
 }
 

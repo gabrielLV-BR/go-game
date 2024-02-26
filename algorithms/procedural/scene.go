@@ -82,11 +82,6 @@ func (level *LevelGenerator) Generate() MeshBuilder {
 
 	return MarchingCubes(
 		grid,
-		mgl32.Vec3{
-			float32(MAX_ROOM_WIDTH),
-			float32(MAX_ROOM_HEIGHT),
-			float32(MAX_ROOM_DEPTH),
-		},
 	)
 }
 

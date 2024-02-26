@@ -8,11 +8,13 @@ import (
 
 type MeshBuilder struct {
 	Meshes    []core.Mesh
+	Scale     mgl32.Vec3
 	IncludeId bool
 }
 
 func (builder *MeshBuilder) New() {
 	builder.Meshes = []core.Mesh{}
+	builder.Scale = mgl32.Vec3{1, 1, 1}
 }
 
 // TODO add UV and Normal information as well
@@ -99,48 +101,27 @@ func (builder *MeshBuilder) Build(removeDuplicates bool) core.Mesh {
 
 	//TODO fix this :')
 	if removeDuplicates {
-		//TODO same logic is in object loader, maybe don't repeat?
-		// keep yourself DRY man!!
-		indexMap := make(map[mgl32.Vec3]uint32)
-		index := uint32(0)
+		panic("Functionality not implemented")
+	}
 
-		for _, mesh := range builder.Meshes {
-			for i := 0; i < len(mesh.Vertices); i += 3 {
-				v := mgl32.Vec3{
-					mesh.Vertices[i],
-					mesh.Vertices[i+1],
-					mesh.Vertices[i+2],
-				}
+	indexOffset := 0
+	vertexIndexOffset := 0
+	for meshIndex, mesh := range builder.Meshes {
+		for i, v := range mesh.Vertices {
+			vertices = append(vertices, v*builder.Scale[vertexIndexOffset])
 
-				maybeIndex, ok := indexMap[v]
+			vertexIndexOffset = (vertexIndexOffset + 1) % 3
 
-				if ok {
-					indices = append(indices, maybeIndex)
-				} else {
-					indexMap[v] = index
-					vertices = append(vertices, v[0], v[1], v[2])
-					indices = append(indices, index)
-					index += 1
-				}
+			if builder.IncludeId && (i+1)%3 == 0 {
+				vertices = append(vertices, float32(meshIndex)/float32(len(mesh.Vertices)))
 			}
 		}
-	} else {
-		indexOffset := 0
-		for meshIndex, mesh := range builder.Meshes {
-			for i, v := range mesh.Vertices {
-				vertices = append(vertices, v)
 
-				if builder.IncludeId && (i+1)%3 == 0 {
-					vertices = append(vertices, float32(meshIndex)/float32(len(mesh.Vertices)))
-				}
-			}
-
-			for _, i := range mesh.Indices {
-				indices = append(indices, i+uint32(indexOffset))
-			}
-
-			indexOffset += len(mesh.Vertices) / 3
+		for _, i := range mesh.Indices {
+			indices = append(indices, i+uint32(indexOffset))
 		}
+
+		indexOffset += len(mesh.Vertices) / 3
 	}
 
 	return core.Mesh{

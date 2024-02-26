@@ -133,10 +133,14 @@ func main() {
 		grid := structs.Grid3D[float32]{}
 		grid.New(5, 5, 5)
 
-		grid.Place(1.0, 4, 0, 0)
+		grid.Place(1.0, 2, 2, 2)
+		grid.Place(1.0, 2, 3, 2)
+		grid.Place(1.0, 3, 2, 2)
+		grid.Place(1.0, 3, 3, 2)
 
-		meshBuilder := procedural.MarchingCubes(grid, mgl32.Vec3{1, 1, 1})
+		meshBuilder := procedural.MarchingCubes(grid)
 		meshBuilder.IncludeId = true
+		meshBuilder.Scale = mgl32.Vec3{1, 1, 1}
 
 		mesh := meshBuilder.Build(false)
 
