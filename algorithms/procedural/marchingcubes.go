@@ -11,7 +11,7 @@ type GridCell struct {
 	Values [8]float32
 }
 
-func MarchingCubes(grid structs.Grid3D[float32]) MeshBuilder {
+func MarchingCubes(grid structs.Grid3D[float32], isolevel float32) MeshBuilder {
 	meshBuilder := MeshBuilder{}
 	meshBuilder.New()
 
@@ -20,7 +20,7 @@ func MarchingCubes(grid structs.Grid3D[float32]) MeshBuilder {
 			for z := 0; z < grid.Dimensions.Z-1; z++ {
 				cell := buildCell(&grid, x, y, z)
 
-				triangles := polygonize(cell)
+				triangles := polygonize(cell, isolevel)
 
 				if len(triangles) == 0 {
 					continue
@@ -36,8 +36,8 @@ func MarchingCubes(grid structs.Grid3D[float32]) MeshBuilder {
 	return meshBuilder
 }
 
-func polygonize(cell GridCell) []structs.Triangle {
-	state := calcState(cell)
+func polygonize(cell GridCell, isolevel float32) []structs.Triangle {
+	state := calcState(cell, isolevel)
 
 	edgeMask := edgeMasks[state]
 
@@ -61,6 +61,7 @@ func polygonize(cell GridCell) []structs.Triangle {
 			index2 := edgeVertexIndices[i][1]
 
 			vertices[i] = vertexInterpolate(
+				isolevel,
 				cell.Points[index1], cell.Values[index1],
 				cell.Points[index2], cell.Values[index2],
 			)
@@ -81,8 +82,10 @@ func polygonize(cell GridCell) []structs.Triangle {
 	return triangles
 }
 
-func vertexInterpolate(v1 mgl32.Vec3, w1 float32, v2 mgl32.Vec3, w2 float32) mgl32.Vec3 {
-	return v1.Add(v2).Mul(0.5)
+func vertexInterpolate(isolevel float32, v1 mgl32.Vec3, w1 float32, v2 mgl32.Vec3, w2 float32) mgl32.Vec3 {
+	t := (isolevel - w1) / (w2 - w1)
+
+	return v1.Add(v2.Sub(v1).Mul(t))
 }
 
 func buildCell(grid *structs.Grid3D[float32], x, y, z int) GridCell {
@@ -118,11 +121,11 @@ func buildCell(grid *structs.Grid3D[float32], x, y, z int) GridCell {
 	return cell
 }
 
-func calcState(cell GridCell) uint8 {
+func calcState(cell GridCell, threshold float32) uint8 {
 	state := uint8(0)
 
 	for i, val := range cell.Values {
-		if val > 0.5 {
+		if val > threshold {
 			state |= 1 << i
 		}
 	}

@@ -131,16 +131,30 @@ func main() {
 		ent := entities.SpinningEntity{}
 
 		grid := structs.Grid3D[float32]{}
-		grid.New(5, 5, 5)
+		grid.New(40, 40, 40)
 
-		grid.Place(1.0, 2, 2, 2)
-		grid.Place(1.0, 2, 3, 2)
-		grid.Place(1.0, 3, 2, 2)
-		grid.Place(1.0, 3, 3, 2)
+		center1 := mgl32.Vec3{20, 20, 20}
+		// center2 := mgl32.Vec3{3, 4, 5}
 
-		meshBuilder := procedural.MarchingCubes(grid)
+		distance := func(x, y, z float32) float32 {
+			p := mgl32.Vec3{x, y, z}
+
+			return p.Sub(center1).Len()
+		}
+
+		for x := 0; x < grid.Dimensions.X; x++ {
+			for y := 0; y < grid.Dimensions.Y; y++ {
+				for z := 0; z < grid.Dimensions.Z; z++ {
+					grid.Place(distance(float32(x), float32(y), float32(z)), x, y, z)
+				}
+			}
+		}
+
+		meshBuilder := procedural.MarchingCubes(grid, 19.0)
 		meshBuilder.IncludeId = true
-		meshBuilder.Scale = mgl32.Vec3{1, 1, 1}
+		meshBuilder.Scale = mgl32.Vec3{1.0 / float32(grid.Dimensions.X), 1.0 / float32(grid.Dimensions.X), 1.0 / float32(grid.Dimensions.Z)}
+
+		meshBuilder.Scale = meshBuilder.Scale.Mul(2.0)
 
 		mesh := meshBuilder.Build(false)
 
