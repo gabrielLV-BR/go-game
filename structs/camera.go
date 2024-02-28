@@ -29,11 +29,11 @@ func (camera *Camera) New() {
 	camera.viewMatrix = mgl32.Ident4()
 }
 
-func (camera *Camera) GetProjectionMatrix() mgl32.Mat4 {
+func (camera *Camera) ProjectionMatrix() mgl32.Mat4 {
 	return camera.projectionMatrix
 }
 
-func (camera *Camera) GetViewMatrix() mgl32.Mat4 {
+func (camera *Camera) ViewMatrix() mgl32.Mat4 {
 	if camera.dirty {
 		camera.recalculateViewMatrix()
 	}

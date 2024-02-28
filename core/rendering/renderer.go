@@ -13,19 +13,15 @@ import (
 
 type Renderer struct {
 	shaderMap map[core.MaterialId]core.Shader
+
+	boundShader     core.Shader
+	boundViewMatrix mgl32.Mat4
+	boundProjMatrix mgl32.Mat4
 }
 
-type RenderPass struct {
-	renderer         *Renderer
-	projectionMatrix mgl32.Mat4
-	viewMatrix       mgl32.Mat4
-}
-
-func NewRenderer(window core.Window) (Renderer, error) {
-	renderer := Renderer{}
-
+func (renderer *Renderer) New(window core.Window) error {
 	if err := gl.Init(); err != nil {
-		return renderer, err
+		return err
 	}
 
 	width, height := window.Size()
@@ -36,92 +32,31 @@ func NewRenderer(window core.Window) (Renderer, error) {
 
 	renderer.shaderMap = make(map[core.MaterialId]core.Shader)
 
-	return renderer, nil
-}
-
-// TODO put this into config file
-func (renderer *Renderer) LoadDefaultMaterials() error {
-	defaultMaterials := []string{
-		"color",
-		"texture",
-		"phong",
-	}
-
-	const root string = "assets/shaders/"
-
-	for _, material := range defaultMaterials {
-		newShader := core.NewShader()
-
-		vertexPath := filepath.Join(root, material+".vert.glsl")
-		fragPath := filepath.Join(root, material+".frag.glsl")
-
-		vertexSource, err := os.ReadFile(vertexPath)
-		if err != nil {
-			return err
-		}
-
-		fragmentSource, err := os.ReadFile(fragPath)
-		if err != nil {
-			return err
-		}
-
-		if err := newShader.LoadStageSource(string(vertexSource), gl.VERTEX_SHADER); err != nil {
-			return err
-		}
-
-		if err := newShader.LoadStageSource(string(fragmentSource), gl.FRAGMENT_SHADER); err != nil {
-			return err
-		}
-
-		if err := newShader.Link(); err != nil {
-			return err
-		}
-
-		renderer.shaderMap[core.MaterialId(material)] = newShader
-	}
-
 	return nil
 }
 
-func (renderer *Renderer) GetShaderFor(material core.Material) core.Shader {
-	program, ok := renderer.shaderMap[material.Id()]
+func (renderer *Renderer) UseCamera(camera *structs.Camera) {
+	renderer.boundProjMatrix = camera.ProjectionMatrix()
+	renderer.boundViewMatrix = camera.ViewMatrix()
+}
+
+func (renderer *Renderer) UseMaterial(material core.Material) {
+	shader, ok := renderer.shaderMap[material.Id()]
 
 	if !ok {
-		panic("No shader for material")
+		panic("No shader found for material")
 	}
 
-	return program
-}
-
-func (renderer *Renderer) BeginDraw(camera *structs.Camera) RenderPass {
-	return RenderPass{
-		renderer:         renderer,
-		projectionMatrix: camera.GetProjectionMatrix(),
-		viewMatrix:       camera.GetViewMatrix(),
-	}
-}
-
-func (pass *RenderPass) EndDraw() {
-	pass.renderer = nil
-}
-
-func (renderer *Renderer) Resize(width, height int) {
-	gl.Viewport(0, 0, int32(width), int32(height))
-}
-
-func (renderer *Renderer) Clear() {
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-}
-
-func (pass *RenderPass) DrawMesh(meshHandle core.MeshHandle, transform structs.Transform, material core.Material) {
-	model := transform.ModelMatrix()
-
-	// get program from material
-	shader := pass.renderer.GetShaderFor(material)
 	shader.Bind()
-	shader.SetMVP(&model, &pass.viewMatrix, &pass.projectionMatrix)
 
 	material.Prepare(shader)
+
+	renderer.boundShader = shader
+}
+
+func (renderer *Renderer) DrawMesh(meshHandle core.MeshHandle, transform structs.Transform) {
+	model := transform.ModelMatrix()
+	renderer.boundShader.SetMVP(&model, &renderer.boundViewMatrix, &renderer.boundProjMatrix)
 
 	meshHandle.Bind()
 
@@ -131,13 +66,9 @@ func (pass *RenderPass) DrawMesh(meshHandle core.MeshHandle, transform structs.T
 		gl.UNSIGNED_INT,
 		nil,
 	)
-
-	//MAYBE remove these calls? pretty sure they're unnecessary
-	shader.Unbind()
-	meshHandle.Unbind()
 }
 
-func (pass *RenderPass) DrawMeshInstanced(meshHandle core.MeshHandle, material core.Material, transforms []mgl32.Mat4) {
+func (renderer *Renderer) DrawMeshInstanced(meshHandle core.MeshHandle, material core.Material, transforms []mgl32.Mat4) {
 	sizeOfMat4 := reflect.TypeOf(mgl32.Mat4{}).Size()
 	sizeOfVec4 := reflect.TypeOf(mgl32.Vec4{}).Size()
 
@@ -159,12 +90,7 @@ func (pass *RenderPass) DrawMeshInstanced(meshHandle core.MeshHandle, material c
 
 	//
 
-	shader := pass.renderer.GetShaderFor(material)
-	shader.Bind()
-
-	material.Prepare(shader)
-
-	shader.SetMVP(&transforms[0], &pass.viewMatrix, &pass.projectionMatrix)
+	renderer.boundShader.SetMVP(&transforms[0], &renderer.boundViewMatrix, &renderer.boundProjMatrix)
 
 	gl.DrawElementsInstanced(
 		gl.TRIANGLES,
@@ -173,7 +99,60 @@ func (pass *RenderPass) DrawMeshInstanced(meshHandle core.MeshHandle, material c
 		nil,
 		int32(len(transforms)),
 	)
+}
 
-	shader.Unbind()
-	meshHandle.Unbind()
+func (renderer *Renderer) Resize(width, height int) {
+	gl.Viewport(0, 0, int32(width), int32(height))
+}
+
+func (renderer *Renderer) Clear() {
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+}
+
+// TODO put this into config file
+func (renderer *Renderer) LoadDefaultMaterials() error {
+	defaultMaterials := []string{
+		"color",
+		"texture",
+		"phong",
+	}
+
+	const root string = "assets/shaders/"
+
+	for _, material := range defaultMaterials {
+		shader := core.Shader{}
+
+		vertexPath := filepath.Join(root, material+".vert.glsl")
+		fragPath := filepath.Join(root, material+".frag.glsl")
+
+		vertexSource, err := os.ReadFile(vertexPath)
+		if err != nil {
+			return err
+		}
+
+		fragmentSource, err := os.ReadFile(fragPath)
+		if err != nil {
+			return err
+		}
+
+		if err := shader.LoadStageSource(string(vertexSource), gl.VERTEX_SHADER); err != nil {
+			return err
+		}
+
+		if err := shader.LoadStageSource(string(fragmentSource), gl.FRAGMENT_SHADER); err != nil {
+			return err
+		}
+
+		if err := shader.Link(); err != nil {
+			return err
+		}
+
+		renderer.LoadMaterial(shader, core.MaterialId(material))
+	}
+
+	return nil
+}
+
+func (renderer *Renderer) LoadMaterial(shader core.Shader, id core.MaterialId) {
+	renderer.shaderMap[id] = shader
 }

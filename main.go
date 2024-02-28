@@ -44,8 +44,9 @@ func main() {
 
 	window.SetupInputSystem()
 
-	renderer, err := rendering.NewRenderer(window)
-	if err != nil {
+	renderer := rendering.Renderer{}
+
+	if err := renderer.New(window); err != nil {
 		panic(err)
 	}
 
@@ -190,13 +191,13 @@ func main() {
 
 		// Rendering fase
 		renderer.Clear()
-		pass := renderer.BeginDraw(gameState.Camera)
+
+		renderer.UseCamera(gameState.Camera)
 
 		for _, model := range gameState.Scene.Models {
-			pass.DrawMesh(model.MeshHandle, model.Transform, model.Material)
+			renderer.UseMaterial(model.Material)
+			renderer.DrawMesh(model.MeshHandle, model.Transform)
 		}
-
-		pass.EndDraw()
 
 		//TODO figure out a way to make this suck less
 		systems.InputSystem.Update()

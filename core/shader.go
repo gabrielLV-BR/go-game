@@ -23,14 +23,6 @@ type Shader struct {
 	uniformCache map[string]int32
 }
 
-func NewShader() Shader {
-	return Shader{
-		program:      0,
-		stages:       []uint32{},
-		uniformCache: make(map[string]int32),
-	}
-}
-
 func (shader *Shader) LoadStageSource(source string, stage uint32) error {
 	handle := gl.CreateShader(stage)
 
@@ -59,6 +51,8 @@ func (shader *Shader) Link() error {
 	}
 
 	gl.LinkProgram(shader.program)
+
+	shader.uniformCache = make(map[string]int32)
 
 	return checkProgramError(shader.program)
 }

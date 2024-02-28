@@ -6,7 +6,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-type GridCell struct {
+type gridCell struct {
 	Points [8]mgl32.Vec3
 	Values [8]float32
 }
@@ -36,7 +36,7 @@ func MarchingCubes(grid structs.Grid3D[float32], isolevel float32) MeshBuilder {
 	return meshBuilder
 }
 
-func polygonize(cell GridCell, isolevel float32) []structs.Triangle {
+func polygonize(cell gridCell, isolevel float32) []structs.Triangle {
 	state := calcState(cell, isolevel)
 
 	edgeMask := edgeMasks[state]
@@ -88,8 +88,8 @@ func vertexInterpolate(isolevel float32, v1 mgl32.Vec3, w1 float32, v2 mgl32.Vec
 	return v1.Add(v2.Sub(v1).Mul(t))
 }
 
-func buildCell(grid *structs.Grid3D[float32], x, y, z int) GridCell {
-	cell := GridCell{}
+func buildCell(grid *structs.Grid3D[float32], x, y, z int) gridCell {
+	cell := gridCell{}
 
 	fx := float32(x)
 	fy := float32(y)
@@ -121,7 +121,7 @@ func buildCell(grid *structs.Grid3D[float32], x, y, z int) GridCell {
 	return cell
 }
 
-func calcState(cell GridCell, threshold float32) uint8 {
+func calcState(cell gridCell, threshold float32) uint8 {
 	state := uint8(0)
 
 	for i, val := range cell.Values {
