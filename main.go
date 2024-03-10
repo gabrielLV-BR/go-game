@@ -9,6 +9,7 @@ import (
 	"gabriellv/game/core/systems"
 	"gabriellv/game/gamedata"
 	"gabriellv/game/gamedata/entities"
+	"gabriellv/game/gamedata/events"
 	"gabriellv/game/loaders"
 	"gabriellv/game/physics"
 	"gabriellv/game/physics/shapes"
@@ -66,10 +67,21 @@ func main() {
 	}
 
 	gameState := gamedata.State{}
+
 	gameState.Camera = &structs.Camera{}
 	gameState.Camera.New()
 	gameState.Camera.UsePerspectiveProjection(80.0, window.AspectRatio(), 0.1, 1000.0)
 	gameState.Camera.SetPosition(mgl32.Vec3{0.0, 0.0, -1.0})
+
+	gameState.EventMap = gamedata.EventMap{}
+	gameState.EventMap.New()
+
+	// configuring event listeners and emitters
+	//TODO actually configure event listeners and emitters
+
+	inputListener := events.InputListener{}
+
+	gameState.EventMap.Subscribe(inputListener, gamedata.INPUT_EVENT)
 
 	{ // Player creation
 		//TODO load this kind of stuff from a file
@@ -182,12 +194,14 @@ func main() {
 	for !window.ShouldClose() {
 		delta := now - lastTime
 
+		deltaf := float32(delta)
+
 		// Update fase
 		for _, ent := range gameState.Scene.Entities {
-			ent.Update(&gameState, float32(delta))
+			ent.Update(&gameState, deltaf)
 		}
 
-		gameState.PhysicsWorld.Update(float32(delta))
+		gameState.PhysicsWorld.Update(deltaf)
 
 		// Rendering fase
 		renderer.Clear()
@@ -198,6 +212,10 @@ func main() {
 			renderer.UseMaterial(model.Material)
 			renderer.DrawMesh(model.MeshHandle, model.Transform)
 		}
+
+		gameState.EventMap.Broadcast(events.InputEvent{
+			Key: "update",
+		})
 
 		//TODO figure out a way to make this suck less
 		systems.InputSystem.Update()

@@ -10,5 +10,7 @@ type State struct {
 
 	Scene Scene
 
+	EventMap EventMap
+
 	PhysicsWorld physics.PhysicsWorld
 }
